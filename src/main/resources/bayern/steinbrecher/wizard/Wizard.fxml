@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2018 Stefan Huber
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="bayern.steinbrecher.wizard.WizardController"
+      fx:id="wizardContainer"
+      styleClass="wizard">
+    <ScrollPane fx:id="scrollContent"
+                fitToHeight="true"
+                fitToWidth="true"
+                hbarPolicy="AS_NEEDED"
+                vbarPolicy="AS_NEEDED"
+                VBox.vgrow="ALWAYS">
+        <StackPane fx:id="contents"
+                   styleClass="wizard-content"/>
+    </ScrollPane>
+    <ButtonBar fx:id="controls"
+               styleClass="wizard-controls">
+        <buttons>
+            <Button fx:id="wizardControlPrevious"
+                    text="%previous"
+                    onAction="#showPrevious"
+                    disable="${controller.atBeginning || controller.changingPage}"
+                    ButtonBar.buttonData="BACK_PREVIOUS"/>
+            <Button fx:id="wizardControlNext"
+                    text="%next"
+                    onAction="#showNext"
+                    disable="${(!controller.currentPage.hasNextFunction) || (!controller.currentPage.valid) || controller.changingPage}"
+                    ButtonBar.buttonData="NEXT_FORWARD"/>
+            <Button fx:id="wizardControlFinish"
+                    text="%finish"
+                    onAction="#finish"
+                    disable="${(!controller.atFinish) || (!controller.currentPage.valid) || controller.changingPage}"
+                    ButtonBar.buttonData="FINISH"/>
+            <!-- NOTE: These round braces are necessary! TODO: WHY?! -->
+        </buttons>
+    </ButtonBar>
+</VBox>
