@@ -1,5 +1,6 @@
 # Generic Wizard
 ![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/bayern.steinbrecher/Wizard?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/03022e27955b420884e58fa4146a0c97)](https://www.codacy.com/manual/junktogo/GenericWizard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TrackerSB/GenericWizard&amp;utm_campaign=Badge_Grade)
 
 This wizard is a JavaFX library which allows to define a wizard in an abstract and generic manner.
 A wizard is organized into pages which can be connected.
