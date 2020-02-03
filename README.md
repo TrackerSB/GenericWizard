@@ -1,4 +1,6 @@
 # Generic Wizard
+![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/bayern.steinbrecher/Wizard?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+
 This wizard is a JavaFX library which allows to define a wizard in an abstract and generic manner.
 A wizard is organized into pages which can be connected.
 For each page you specify the following set of properties:
