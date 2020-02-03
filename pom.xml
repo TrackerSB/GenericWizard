@@ -99,7 +99,7 @@
                 <configuration>
                     <consoleOutput>false</consoleOutput>
                     <failOnViolation>false</failOnViolation>
-                    <configLocation>checkstyleConfig.xml</configLocation>
+                    <configLocation>checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
             <plugin>
@@ -119,7 +119,7 @@
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                     <targetJdk>${maven.compiler.target}</targetJdk>
                     <rulesets>
-                        <ruleset>pmdConfig.xml</ruleset>
+                        <ruleset>ruleset.xml</ruleset>
                     </rulesets>
                     <skipEmptyReport>false</skipEmptyReport>
                 </configuration>
