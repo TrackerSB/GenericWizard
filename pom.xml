@@ -10,6 +10,7 @@
     <name>Wizard</name>
     <description>Contains a library to create dynamic and branching JavaFX wizards in an abstract way.</description>
     <inceptionYear>2020</inceptionYear>
+    <url>https://github.com/TrackerSB/GenericWizard</url>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
