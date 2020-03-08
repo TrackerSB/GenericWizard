@@ -4,14 +4,14 @@
 
     <groupId>bayern.steinbrecher</groupId>
     <artifactId>Wizard</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    
+
     <name>Wizard</name>
     <description>Contains a library to create dynamic and branching JavaFX wizards in an abstract way.</description>
     <inceptionYear>2020</inceptionYear>
     <url>https://github.com/TrackerSB/GenericWizard</url>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>13</maven.compiler.release>
@@ -171,7 +171,7 @@
         <name>Steinbrecher</name>
         <url>http://www.steinbrecher.bayern</url>
     </organization>
-    
+
     <scm>
         <connection>scm:git:ssh://git@github.com/TrackerSB/GenericWizard.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/TrackerSB/GenericWizard.git</developerConnection>
