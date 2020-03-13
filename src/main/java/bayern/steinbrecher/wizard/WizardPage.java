@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2020 Stefan Huber.
@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
@@ -61,9 +62,14 @@ public final class WizardPage<T> {
      * @param valid A binding to bind this pages {@code valid} property to.
      */
     public WizardPage(Pane root, Callable<String> nextFunction, boolean finish,
-            Callable<T> resultFunction,
-            ObservableValue<? extends Boolean> valid) {
-        this(root, nextFunction, finish, resultFunction);
+            Callable<T> resultFunction, ObservableValue<? extends Boolean> valid) {
+        this.root = root;
+        this.nextFunction.addListener((obs, oldVal, newVal) -> {
+            hasNextFunction.set(newVal != null);
+        });
+        this.nextFunction.setValue(nextFunction);
+        this.finish = finish;
+        this.resultFunction = Objects.requireNonNull(resultFunction, "The resultFunction must not be zero.");
         this.valid.bind(valid);
     }
 
@@ -77,15 +83,7 @@ public final class WizardPage<T> {
      */
     public WizardPage(Pane root, Callable<String> nextFunction, boolean finish,
             Callable<T> resultFunction) {
-        this.root = root;
-        this.nextFunction.addListener((obs, oldVal, newVal) -> {
-            hasNextFunction.set(newVal != null);
-        });
-        this.nextFunction.setValue(nextFunction);
-        this.finish = finish;
-        this.resultFunction = Objects.requireNonNull(resultFunction, "The resultFunction must not be zero.");
-        valid.unbind();
-        valid.set(true);
+        this(root, nextFunction, finish, resultFunction, new SimpleBooleanProperty(true));
     }
 
     /**
