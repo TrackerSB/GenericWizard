@@ -23,7 +23,6 @@
  */
 package bayern.steinbrecher.wizard;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javafx.fxml.FXML;
@@ -142,8 +141,6 @@ public class WizardController implements Initializable {
     }
 
     @FXML
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "It is called by an appropriate fxml file")
     @SuppressWarnings("unused")
     private void showPrevious() {
         if (!atBeginning.get() && !changingPage.get()) {
@@ -155,8 +152,6 @@ public class WizardController implements Initializable {
     }
 
     @FXML
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "It is called by an appropriate fxml file")
     @SuppressWarnings("unused")
     private void showNext() {
         if (currentPage.getValue().isValid() && !changingPage.get()) {
@@ -185,8 +180,6 @@ public class WizardController implements Initializable {
     }
 
     @FXML
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "It is called by an appropriate fxml file")
     @SuppressWarnings("unused")
     private void finish() {
         if (currentPage.getValue().isValid() && atFinish.get()) {
