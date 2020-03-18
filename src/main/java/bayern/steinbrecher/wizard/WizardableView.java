@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
@@ -43,13 +44,16 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
 
     private C controller;
 
-    protected final <P extends Parent> P loadFXML(String fxmlPath) throws IOException {
+    protected final <P extends Parent> P loadFXML(String fxmlPath, Optional<ResourceBundle> resourceBundle)
+            throws IOException {
         URL resource = getClass().getResource(fxmlPath);
         if (resource == null) {
             throw new FileNotFoundException(
                     "The class " + getClass().getName() + " can not find the resource " + fxmlPath);
         } else {
-            FXMLLoader fxmlLoader = new FXMLLoader(resource);
+            FXMLLoader fxmlLoader = resourceBundle.isPresent()
+                    ? new FXMLLoader(resource, resourceBundle.get())
+                    : new FXMLLoader(resource);
             P root = fxmlLoader.load();
             controller = fxmlLoader.getController();
             return root;
@@ -65,15 +69,23 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
     protected abstract String getWizardFxmlPath();
 
     /**
+     * Returns the resource bundle which contains the resources that the content of the {@link WizardPage} requires.
+     *
+     * @return The resource bundle which contains the resources that the content of the {@link WizardPage} requires.
+     * @see #getWizardPage()
+     */
+    protected abstract Optional<ResourceBundle> getResourceBundle();
+
+    /**
      * Creates a {@link WizardPage}.The nextFunction is set to {@code null} and isFinish is set to {@code false}.
      *
      * @return The newly created {@link WizardPage}. Returns {@code null} if the {@link WizardPage} could not be
      * created.
-     * @throws IOException {@link #loadFXML(java.lang.String)}
+     * @throws IOException {@link #loadFXML(java.lang.String, java.util.Optional)}
      */
     public WizardPage<T> getWizardPage() throws IOException {
         WizardPage<T> page;
-        Pane root = loadFXML(getWizardFxmlPath());
+        Pane root = loadFXML(getWizardFxmlPath(), getResourceBundle());
         page = new WizardPage<>(
                 root, null, false, () -> getController().getResult(), getController().validProperty());
         return page;

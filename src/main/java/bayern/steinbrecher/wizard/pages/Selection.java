@@ -16,8 +16,12 @@
  */
 package bayern.steinbrecher.wizard.pages;
 
+import bayern.steinbrecher.wizard.WizardPage;
 import bayern.steinbrecher.wizard.WizardableView;
+import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
+import java.io.IOException;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.fxml.FXML;
 
@@ -54,5 +58,13 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
     @Override
     protected String getWizardFxmlPath() {
         return "Selection.fxml";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Optional<ResourceBundle> getResourceBundle() {
+        return Optional.of(ResourceBundleHandler.RESOURCE_BUNDLE);
     }
 }
