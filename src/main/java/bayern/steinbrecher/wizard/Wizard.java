@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2020 Stefan Huber.
@@ -48,6 +48,7 @@ import javafx.stage.Stage;
  * </ul>
  *
  * @author Stefan Huber
+ * @since 1.0
  */
 public class Wizard extends Application {
 

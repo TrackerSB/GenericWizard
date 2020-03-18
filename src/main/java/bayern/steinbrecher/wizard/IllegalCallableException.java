@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2020 Stefan Huber.
@@ -27,6 +27,7 @@ package bayern.steinbrecher.wizard;
  * Signals that calling a {@code Callable} of a page has thrown an exception.
  *
  * @author Stefan Huber
+ * @since 1.0
  */
 public class IllegalCallableException extends RuntimeException {
 

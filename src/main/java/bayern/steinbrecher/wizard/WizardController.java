@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2020 Stefan Huber.
@@ -68,6 +68,7 @@ import javafx.util.Duration;
  * Contains the controller of the wizard.
  *
  * @author Stefan Huber
+ * @since 1.0
  */
 public class WizardController implements Initializable {
 

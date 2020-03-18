@@ -37,6 +37,7 @@ import javafx.stage.Stage;
  *
  * @author Stefan Huber
  * @param <T> The type of the result represented by this controller.
+ * @since 1.2
  */
 public abstract class WizardableController<T extends Optional<?>> {
 

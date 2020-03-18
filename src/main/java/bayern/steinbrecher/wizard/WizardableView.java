@@ -38,6 +38,7 @@ import javax.swing.text.View;
  * @param <T> The type of the result of the {@link WizardPage}.
  * @param <C> The type of the controller used by the {@link View}.
  * @author Stefan Huber
+ * @since 1.2
  */
 public abstract class WizardableView<T extends Optional<?>, C extends WizardableController<T>> {
 

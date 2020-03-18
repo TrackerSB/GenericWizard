@@ -38,6 +38,7 @@ import javafx.scene.layout.Pane;
  *
  * @author Stefan Huber
  * @param <T> The return type of the result represented by the page.
+ * @since 1.0
  */
 public final class WizardPage<T> {
 
