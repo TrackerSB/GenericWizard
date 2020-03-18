@@ -30,4 +30,5 @@ module bayern.steinbrecher.wizard {
     requires javafx.controls;
 
     exports bayern.steinbrecher.wizard;
+    exports bayern.steinbrecher.wizard.pages;
 }

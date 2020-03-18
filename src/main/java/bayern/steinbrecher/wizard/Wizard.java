@@ -23,6 +23,7 @@
  */
 package bayern.steinbrecher.wizard;
 
+import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class Wizard extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Wizard.class.getResource("Wizard.fxml"));
-        fxmlLoader.setResources(ResourceBundle.getBundle("bayern.steinbrecher.wizard.bundles.Wizard"));
+        fxmlLoader.setResources(ResourceBundleHandler.RESOURCE_BUNDLE);
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
         scene.setOnMousePressed(mevt -> {
@@ -91,7 +92,6 @@ public class Wizard extends Application {
             stage.setY(mevt.getScreenY() + yDragOffset);
         });
         stage.setScene(scene);
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         controller = fxmlLoader.getController();
         controller.setStage(stage);
         controller.setPages(pages);
