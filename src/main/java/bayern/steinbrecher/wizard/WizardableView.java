@@ -23,7 +23,9 @@
  */
 package bayern.steinbrecher.wizard;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -41,11 +43,17 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
 
     private C controller;
 
-    protected final <P extends Parent> P loadFXML(String resource) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(resource));
-        P root = fxmlLoader.load();
-        controller = fxmlLoader.getController();
-        return root;
+    protected final <P extends Parent> P loadFXML(String fxmlPath) throws IOException {
+        URL resource = getClass().getResource(fxmlPath);
+        if (resource == null) {
+            throw new FileNotFoundException(
+                    "The class " + getClass().getName() + " can not find the resource " + fxmlPath);
+        } else {
+            FXMLLoader fxmlLoader = new FXMLLoader(resource);
+            P root = fxmlLoader.load();
+            controller = fxmlLoader.getController();
+            return root;
+        }
     }
 
     /**
