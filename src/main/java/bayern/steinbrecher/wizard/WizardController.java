@@ -26,14 +26,11 @@ package bayern.steinbrecher.wizard;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -69,7 +66,7 @@ import javafx.util.Duration;
  * @author Stefan Huber
  * @since 1.0
  */
-public class WizardController implements Initializable {
+public final class WizardController {
 
     private static final Logger LOGGER = Logger.getLogger(WizardController.class.getName());
     /**
@@ -101,11 +98,8 @@ public class WizardController implements Initializable {
     private static final String WIZARD_CONTENT_STYLECLASS = "wizard-content";
     private static final Duration SWIPE_DURATION = Duration.seconds(0.75);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    @FXML
+    private void initialize() {
         pages.addListener((obs, oldVal, newVal) -> {
             newVal.values().stream()
                     .map(WizardPage::getRoot)
