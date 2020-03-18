@@ -8,7 +8,10 @@
     <packaging>jar</packaging>
 
     <name>Wizard</name>
-    <description>Contains a library to create dynamic and branching JavaFX wizards in an abstract way.</description>
+    <description>
+        Contains a library to create dynamic and branching JavaFX wizards in an abstract way.
+        Comes with a predefined collection of typical wizard pages.
+    </description>
     <inceptionYear>2020</inceptionYear>
     <url>https://github.com/TrackerSB/GenericWizard</url>
 
