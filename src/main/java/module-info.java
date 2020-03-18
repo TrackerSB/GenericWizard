@@ -31,4 +31,7 @@ module bayern.steinbrecher.wizard {
 
     exports bayern.steinbrecher.wizard;
     exports bayern.steinbrecher.wizard.pages;
+
+    opens bayern.steinbrecher.wizard to javafx.fxml;
+    opens bayern.steinbrecher.wizard.pages to javafx.fxml;
 }
