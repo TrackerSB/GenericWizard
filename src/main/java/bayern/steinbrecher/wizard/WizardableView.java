@@ -30,13 +30,12 @@ import java.util.Optional;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
-import javax.swing.text.View;
 
 /**
  * Represents a class which can be in a {@link bayern.steinbrecher.wizard.Wizard}.
  *
  * @param <T> The type of the result of the {@link WizardPage}.
- * @param <C> The type of the controller used by the {@link View}.
+ * @param <C> The type of the controller used by the {@link WizardableView}.
  * @author Stefan Huber
  * @since 1.2
  */
