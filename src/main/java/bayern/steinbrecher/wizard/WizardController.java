@@ -99,6 +99,7 @@ public final class WizardController {
     private static final Duration SWIPE_DURATION = Duration.seconds(0.75);
 
     @FXML
+    @SuppressWarnings("unused")
     private void initialize() {
         pages.addListener((obs, oldVal, newVal) -> {
             newVal.values().stream()

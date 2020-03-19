@@ -24,12 +24,9 @@
 package bayern.steinbrecher.wizard;
 
 import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyProperty;

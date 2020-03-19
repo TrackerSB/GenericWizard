@@ -16,10 +16,8 @@
  */
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardPage;
 import bayern.steinbrecher.wizard.WizardableView;
 import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;

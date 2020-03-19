@@ -61,6 +61,7 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
             = (obs, oldVal, newVal) -> selectedCount.set(selectedCount.get() + (newVal ? 1 : -1));
 
     @FXML
+    @SuppressWarnings("unused")
     private void initialize() {
         outOf.textProperty()
                 .bind(Bindings.createStringBinding(
