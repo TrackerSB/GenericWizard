@@ -28,6 +28,7 @@ import javafx.fxml.FXML;
  *
  * @param <T> The type of the attributes being able to select.
  * @author Stefan Huber
+ * @since 1.4
  */
 public class Selection<T extends Comparable<T>> extends WizardableView<Optional<Set<T>>, SelectionController<T>> {
 

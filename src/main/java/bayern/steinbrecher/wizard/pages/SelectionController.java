@@ -44,6 +44,7 @@ import javafx.scene.layout.Priority;
  *
  * @param <T> The type of the objects being able to select.
  * @author Stefan Huber
+ * @since 1.4
  */
 public class SelectionController<T extends Comparable<T>> extends WizardableController<Optional<Set<T>>> {
 
