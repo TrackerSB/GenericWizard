@@ -21,7 +21,6 @@ import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import javafx.fxml.FXML;
 
 /**
  * Represents a selection dialog.
@@ -40,13 +39,11 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
      *
      * @param options The options the user is allowed to select.
      */
-    public Selection(Set<T> options) {
+    private Selection(Set<T> options) {
         super();
         this.options = options;
     }
 
-    @FXML
-    @SuppressWarnings("unused")
     private void initialize() {
         getController().setOptions(options);
     }
@@ -65,5 +62,11 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
     @Override
     protected Optional<ResourceBundle> getResourceBundle() {
         return Optional.of(ResourceBundleHandler.RESOURCE_BUNDLE);
+    }
+
+    public static <T extends Comparable<T>> Selection<T> create(Set<T> options) {
+        Selection<T> selection = new Selection<>(options);
+        selection.initialize();
+        return selection;
     }
 }
