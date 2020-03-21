@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-module bayern.steinbrecher.wizard {
+module bayern.steinbrecher.GenericWizard {
     requires javafx.fxml;
     requires javafx.graphics;
     requires java.desktop;
