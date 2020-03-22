@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -28,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               maxHeight="300"
               focusTraversable="false"/>
     <Label fx:id="outOf" />
+    <TextField prompt="%search"
+               fx:id="listSearch" />
     <ButtonBar>
         <buttons>
             <Button disable="${controller.allSelected}"

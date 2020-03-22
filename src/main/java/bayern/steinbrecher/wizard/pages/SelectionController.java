@@ -19,6 +19,8 @@ package bayern.steinbrecher.wizard.pages;
 import bayern.steinbrecher.wizard.WizardableController;
 import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,10 +34,12 @@ import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
@@ -60,6 +64,8 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
     private ListView<CheckBox> optionsListView; //TODO Use ListView<T>
     private final ChangeListener<Boolean> selectionChange
             = (obs, oldVal, newVal) -> selectedCount.set(selectedCount.get() + (newVal ? 1 : -1));
+    @FXML
+    private TextField listSearch;
 
     @FXML
     @SuppressWarnings("unused")
@@ -68,9 +74,11 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
                 .bind(Bindings.createStringBinding(
                         () -> ResourceBundleHandler.getResourceValue("chosenOutOf", getSelectedCount(), getTotalCount()),
                         selectedCount, totalCount));
+
         nothingSelected.bind(selectedCount.lessThanOrEqualTo(0));
         allSelected.bind(selectedCount.greaterThanOrEqualTo(totalCount));
         bindValidProperty(nothingSelected.not());
+
         optionsListView.itemsProperty().bind(Bindings.createObjectBinding(() -> {
             optionsProperty.entrySet().stream()
                     .filter(entry -> !entry.getValue().isPresent())
@@ -79,11 +87,21 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
                         newItem.selectedProperty().addListener(selectionChange);
                         entry.setValue(Optional.of(newItem));
                     });
-            return FXCollections.observableArrayList(optionsProperty.values()
+            List<CheckBox> listItems = optionsProperty.values()
                     .stream()
                     .map(Optional::get)
                     .sorted((c, d) -> c.getText().compareToIgnoreCase(d.getText()))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
+            return new FilteredList<>(
+                    FXCollections.observableList(listItems),
+                    i -> {
+                        String searchCriterion = listSearch.getText();
+                        return searchCriterion == null
+                        || searchCriterion.isBlank()
+                        || i.getText().toLowerCase(Locale.ROOT)
+                                .contains(searchCriterion.toLowerCase(Locale.ROOT));
+                    }
+            );
         }, optionsProperty));
 
         HBox.setHgrow(optionsListView, Priority.ALWAYS);
