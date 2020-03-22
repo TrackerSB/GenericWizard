@@ -44,7 +44,11 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
         this.options = options;
     }
 
-    private void initialize() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void afterControllerInitialized() {
         getController().setOptions(options);
     }
 
@@ -62,11 +66,5 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
     @Override
     protected Optional<ResourceBundle> getResourceBundle() {
         return Optional.of(ResourceBundleHandler.RESOURCE_BUNDLE);
-    }
-
-    public static <T extends Comparable<T>> Selection<T> create(Set<T> options) {
-        Selection<T> selection = new Selection<>(options);
-        selection.initialize();
-        return selection;
     }
 }

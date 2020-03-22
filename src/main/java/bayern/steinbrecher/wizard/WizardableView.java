@@ -56,9 +56,18 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
                     : new FXMLLoader(resource);
             P root = fxmlLoader.load();
             controller = fxmlLoader.getController();
+            afterControllerInitialized();
             return root;
         }
     }
+
+    /**
+     * This method is executed after the FXML is loaded and right after the corresponding controller is set. This
+     * function represents an equivalent to a FXML controllers initialize method.
+     *
+     * @since 1.8
+     */
+    protected abstract void afterControllerInitialized();
 
     /**
      * Returns the path of the FXML file to load to be used by a wizard.
