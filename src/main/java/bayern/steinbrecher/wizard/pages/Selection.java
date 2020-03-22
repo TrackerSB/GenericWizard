@@ -39,7 +39,7 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
      *
      * @param options The options the user is allowed to select.
      */
-    private Selection(Set<T> options) {
+    public Selection(Set<T> options) {
         super();
         this.options = options;
     }
