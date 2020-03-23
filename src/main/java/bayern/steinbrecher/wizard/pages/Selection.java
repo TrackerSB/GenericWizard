@@ -38,7 +38,7 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
      * @param options The options the user is allowed to select.
      */
     public Selection(Set<T> options) {
-        super();
+        super("Selection.fxml");
         this.options = options;
     }
 
@@ -48,13 +48,5 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
     @Override
     protected void afterControllerInitialized() {
         getController().setOptions(options);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getWizardFxmlPath() {
-        return "Selection.fxml";
     }
 }

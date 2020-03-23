@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
@@ -35,20 +34,28 @@ import javafx.scene.layout.Pane;
  */
 public abstract class WizardableView<T extends Optional<?>, C extends WizardableController<T>> {
 
+    private final String fxmlPath;
     private C controller;
 
-    protected final <P extends Parent> P loadFXML(String fxmlPath, Optional<ResourceBundle> resourceBundle)
+    /**
+     * @since 1.13
+     */
+    public WizardableView(String fxmlPath) {
+        this.fxmlPath = fxmlPath;
+    }
+
+    private <P extends Parent> P loadFXML()
             throws IOException {
         URL resource = getClass().getResource(fxmlPath);
         if (resource == null) {
             throw new FileNotFoundException(
                     "The class " + getClass().getName() + " can not find the resource " + fxmlPath);
         } else {
-            FXMLLoader fxmlLoader = resourceBundle.isPresent()
-                    ? new FXMLLoader(resource, resourceBundle.get())
-                    : new FXMLLoader(resource);
+            FXMLLoader fxmlLoader = new FXMLLoader(resource);
             P root = fxmlLoader.load();
             controller = fxmlLoader.getController();
+            controller.getResourceBundle()
+                    .ifPresent(fxmlLoader::setResources);
             afterControllerInitialized();
             return root;
         }
@@ -63,14 +70,6 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
     protected abstract void afterControllerInitialized();
 
     /**
-     * Returns the path of the FXML file to load to be used by a wizard.
-     *
-     * @return The path of the FXML file to load to be used by a wizard.
-     * @see #getWizardPage()
-     */
-    protected abstract String getWizardFxmlPath();
-
-    /**
      * Creates a {@link WizardPage}.The nextFunction is set to {@code null} and isFinish is set to {@code false}.
      *
      * @return The newly created {@link WizardPage}. Returns {@code null} if the {@link WizardPage} could not be
@@ -79,7 +78,7 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
      */
     public WizardPage<T> getWizardPage() throws IOException {
         WizardPage<T> page;
-        Pane root = loadFXML(getWizardFxmlPath(), getController().getResourceBundle());
+        Pane root = loadFXML();
         page = new WizardPage<>(
                 root, null, false, () -> getController().getResult(), getController().validProperty());
         return page;
