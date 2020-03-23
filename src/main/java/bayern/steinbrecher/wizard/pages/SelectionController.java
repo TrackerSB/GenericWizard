@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
 package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.wizard.WizardableController;
-import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
@@ -72,8 +72,10 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
     private void initialize() {
         outOf.textProperty()
                 .bind(Bindings.createStringBinding(
-                        () -> ResourceBundleHandler.getResourceValue("chosenOutOf", getSelectedCount(), getTotalCount()),
-                        selectedCount, totalCount));
+                        () -> getResourceValue("chosenOutOf", getSelectedCount(), getTotalCount()),
+                        selectedCount,
+                        totalCount)
+                );
 
         nothingSelected.bind(selectedCount.lessThanOrEqualTo(0));
         allSelected.bind(selectedCount.greaterThanOrEqualTo(totalCount));
@@ -219,5 +221,13 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
      */
     public boolean isAllSelected() {
         return allSelected.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Optional<ResourceBundle> getResourceBundle() {
+        return Optional.of(ResourceBundle.getBundle("bayern.steinbrecher.wizard.bundles.Selection"));
     }
 }

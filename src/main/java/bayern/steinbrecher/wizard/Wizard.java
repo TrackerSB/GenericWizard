@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,10 @@
  */
 package bayern.steinbrecher.wizard;
 
-import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyProperty;
@@ -69,8 +69,8 @@ public class Wizard extends Application {
      */
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(Wizard.class.getResource("Wizard.fxml"));
-        fxmlLoader.setResources(ResourceBundleHandler.RESOURCE_BUNDLE);
+        FXMLLoader fxmlLoader = new FXMLLoader(Wizard.class.getResource("Wizard.fxml"),
+                ResourceBundle.getBundle("bayern.steinbrecher.wizard.bundles.Wizard"));
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
         scene.setOnMousePressed(mevt -> {

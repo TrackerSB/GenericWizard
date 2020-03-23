@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -71,14 +71,6 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
     protected abstract String getWizardFxmlPath();
 
     /**
-     * Returns the resource bundle which contains the resources that the content of the {@link WizardPage} requires.
-     *
-     * @return The resource bundle which contains the resources that the content of the {@link WizardPage} requires.
-     * @see #getWizardPage()
-     */
-    protected abstract Optional<ResourceBundle> getResourceBundle();
-
-    /**
      * Creates a {@link WizardPage}.The nextFunction is set to {@code null} and isFinish is set to {@code false}.
      *
      * @return The newly created {@link WizardPage}. Returns {@code null} if the {@link WizardPage} could not be
@@ -87,7 +79,7 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
      */
     public WizardPage<T> getWizardPage() throws IOException {
         WizardPage<T> page;
-        Pane root = loadFXML(getWizardFxmlPath(), getResourceBundle());
+        Pane root = loadFXML(getWizardFxmlPath(), getController().getResourceBundle());
         page = new WizardPage<>(
                 root, null, false, () -> getController().getResult(), getController().validProperty());
         return page;

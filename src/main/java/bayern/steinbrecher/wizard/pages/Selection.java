@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,7 @@
 package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.wizard.WizardableView;
-import bayern.steinbrecher.wizard.utility.ResourceBundleHandler;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
@@ -58,13 +56,5 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
     @Override
     protected String getWizardFxmlPath() {
         return "Selection.fxml";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Optional<ResourceBundle> getResourceBundle() {
-        return Optional.of(ResourceBundleHandler.RESOURCE_BUNDLE);
     }
 }

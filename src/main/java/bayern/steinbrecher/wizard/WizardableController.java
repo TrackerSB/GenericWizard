@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,11 @@
  */
 package bayern.steinbrecher.wizard;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -46,6 +50,43 @@ public abstract class WizardableController<T extends Optional<?>> {
      * Only {@code true} when the user explicitly aborted his input. (E.g. pressing the X of the window.)
      */
     private boolean userAborted;
+
+    /**
+     * Returns the resource bundle which contains the resources that the content of the {@link WizardPage} requires.
+     *
+     * @return The resource bundle which contains the resources that the content of the {@link WizardPage} requires.
+     * @see #getWizardPage()
+     * @since 1.12
+     */
+    protected abstract Optional<ResourceBundle> getResourceBundle();
+
+    /**
+     * Returns the value behind {@code key} of the resource bundle inserted params.
+     *
+     * @param key The key to search for.
+     * @param params The params to insert.
+     * @return The value with inserted params.
+     * @since 1.12
+     */
+    public String getResourceValue(String key, Object... params) {
+        return getResourceBundle()
+                .map(b -> MessageFormat.format(b.getString(key), params))
+                .orElse(key);
+    }
+
+    /**
+     * Returns a list of values behind {@code key} of the resource bundle and with inserted params.
+     *
+     * @param key The key to search for.
+     * @param params The list of params to insert each in the value behind {@code key}.
+     * @return The list of values with inserted params.
+     * @since 1.12
+     */
+    public List<String> getResourceValues(String key, List<Object[]> params) {
+        List<String> values = new ArrayList<>(params.size());
+        params.stream().forEachOrdered(p -> values.add(getResourceValue(key, p)));
+        return values;
+    }
 
     /**
      * Returns the current result that the content of the page represents.
