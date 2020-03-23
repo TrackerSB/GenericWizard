@@ -74,7 +74,7 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
      *
      * @return The newly created {@link WizardPage}. Returns {@code null} if the {@link WizardPage} could not be
      * created.
-     * @throws IOException {@link #loadFXML(java.lang.String, java.util.Optional)}
+     * @throws IOException {@link #loadFXML()}
      */
     public WizardPage<T> getWizardPage() throws IOException {
         WizardPage<T> page;
