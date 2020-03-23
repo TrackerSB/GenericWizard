@@ -55,7 +55,6 @@ public abstract class WizardableController<T extends Optional<?>> {
      * Returns the resource bundle which contains the resources that the content of the {@link WizardPage} requires.
      *
      * @return The resource bundle which contains the resources that the content of the {@link WizardPage} requires.
-     * @see #getWizardPage()
      * @since 1.12
      */
     protected abstract Optional<ResourceBundle> getResourceBundle();
