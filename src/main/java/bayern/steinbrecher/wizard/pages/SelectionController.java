@@ -18,10 +18,8 @@ package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.wizard.WizardableController;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
@@ -32,8 +30,10 @@ import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleMapProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -81,30 +81,33 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
         allSelected.bind(selectedCount.greaterThanOrEqualTo(totalCount));
         bindValidProperty(nothingSelected.not());
 
-        optionsListView.itemsProperty().bind(Bindings.createObjectBinding(() -> {
-            optionsProperty.entrySet().stream()
+        ObservableList<CheckBox> listItems = FXCollections.observableArrayList();
+        FilteredList<CheckBox> filteredListItems = listItems.filtered(cb -> true);
+        optionsListView.itemsProperty().bind(new SimpleObjectProperty<>(filteredListItems));
+        optionsProperty.addListener((obs, oldVal, newVal) -> {
+            newVal.entrySet().stream()
                     .filter(entry -> !entry.getValue().isPresent())
                     .forEach(entry -> {
                         CheckBox newItem = new CheckBox(entry.getKey().toString());
                         newItem.selectedProperty().addListener(selectionChange);
                         entry.setValue(Optional.of(newItem));
                     });
-            List<CheckBox> listItems = optionsProperty.values()
+            listItems.setAll(newVal.values()
                     .stream()
                     .map(Optional::get)
                     .sorted((c, d) -> c.getText().compareToIgnoreCase(d.getText()))
-                    .collect(Collectors.toList());
-            return new FilteredList<>(
-                    FXCollections.observableList(listItems),
-                    i -> {
-                        String searchCriterion = listSearch.getText();
-                        return searchCriterion == null
-                        || searchCriterion.isBlank()
-                        || i.getText().toLowerCase(Locale.ROOT)
-                                .contains(searchCriterion.toLowerCase(Locale.ROOT));
-                    }
-            );
-        }, optionsProperty));
+                    .collect(Collectors.toList()));
+        });
+        listSearch.textProperty()
+                .addListener((obs, oldVal, newVal) -> {
+                    filteredListItems.setPredicate(cb -> {
+                        String item = cb.getText();
+                        return item == null
+                                || item.isBlank()
+                                || item.toLowerCase(Locale.ROOT)
+                                        .contains(newVal.toLowerCase(Locale.ROOT));
+                    });
+                });
 
         HBox.setHgrow(optionsListView, Priority.ALWAYS);
     }
