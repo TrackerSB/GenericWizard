@@ -42,9 +42,9 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
     /**
      * @since 1.13
      */
-    public WizardableView(String fxmlPath, String bundlePath) {
+    public WizardableView(String fxmlPath, ResourceBundle bundle) {
         this.fxmlPath = fxmlPath;
-        this.bundle = ResourceBundle.getBundle(bundlePath);
+        this.bundle = bundle;
     }
 
     private <P extends Parent> P loadFXML()

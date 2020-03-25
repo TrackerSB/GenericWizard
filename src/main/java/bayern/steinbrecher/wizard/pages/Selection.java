@@ -18,6 +18,7 @@ package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.wizard.WizardableView;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
@@ -38,7 +39,7 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
      * @param options The options the user is allowed to select.
      */
     public Selection(Set<T> options) {
-        super("Selection.fxml", "bayern.steinbrecher.wizard.bundles.Selection");
+        super("Selection.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.bundles.Selection"));
         this.options = options;
     }
 
