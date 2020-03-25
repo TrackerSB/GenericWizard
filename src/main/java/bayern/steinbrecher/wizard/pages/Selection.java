@@ -38,7 +38,7 @@ public class Selection<T extends Comparable<T>> extends WizardableView<Optional<
      * @param options The options the user is allowed to select.
      */
     public Selection(Set<T> options) {
-        super("Selection.fxml");
+        super("Selection.fxml", "bayern.steinbrecher.wizard.bundles.Selection");
         this.options = options;
     }
 

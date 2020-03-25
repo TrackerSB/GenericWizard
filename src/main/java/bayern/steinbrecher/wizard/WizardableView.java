@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
@@ -35,13 +36,15 @@ import javafx.scene.layout.Pane;
 public abstract class WizardableView<T extends Optional<?>, C extends WizardableController<T>> {
 
     private final String fxmlPath;
+    private final ResourceBundle bundle;
     private C controller;
 
     /**
      * @since 1.13
      */
-    public WizardableView(String fxmlPath) {
+    public WizardableView(String fxmlPath, String bundlePath) {
         this.fxmlPath = fxmlPath;
+        this.bundle = ResourceBundle.getBundle(bundlePath);
     }
 
     private <P extends Parent> P loadFXML()
@@ -51,11 +54,9 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
             throw new FileNotFoundException(
                     "The class " + getClass().getName() + " can not find the resource " + fxmlPath);
         } else {
-            FXMLLoader fxmlLoader = new FXMLLoader(resource);
+            FXMLLoader fxmlLoader = new FXMLLoader(resource, bundle);
             P root = fxmlLoader.load();
             controller = fxmlLoader.getController();
-            controller.getResourceBundle()
-                    .ifPresent(fxmlLoader::setResources);
             afterControllerInitialized();
             return root;
         }

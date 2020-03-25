@@ -28,6 +28,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.Stage;
+import javafx.fxml.FXML;
 
 /**
  * Represents a controller of a {@link WizardableView}.
@@ -50,14 +51,8 @@ public abstract class WizardableController<T extends Optional<?>> {
      * Only {@code true} when the user explicitly aborted his input. (E.g. pressing the X of the window.)
      */
     private boolean userAborted;
-
-    /**
-     * Returns the resource bundle which contains the resources that the content of the {@link WizardPage} requires.
-     *
-     * @return The resource bundle which contains the resources that the content of the {@link WizardPage} requires.
-     * @since 1.12
-     */
-    protected abstract Optional<ResourceBundle> getResourceBundle();
+    @FXML
+    private ResourceBundle resources;
 
     /**
      * Returns the value behind {@code key} of the resource bundle inserted params.
@@ -68,9 +63,7 @@ public abstract class WizardableController<T extends Optional<?>> {
      * @since 1.12
      */
     public String getResourceValue(String key, Object... params) {
-        return getResourceBundle()
-                .map(b -> MessageFormat.format(b.getString(key), params))
-                .orElse(key);
+        return resources.containsKey(key) ? MessageFormat.format(resources.getString(key), params) : key;
     }
 
     /**

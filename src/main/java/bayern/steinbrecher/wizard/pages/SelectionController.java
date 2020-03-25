@@ -222,12 +222,4 @@ public class SelectionController<T extends Comparable<T>> extends WizardableCont
     public boolean isAllSelected() {
         return allSelected.get();
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Optional<ResourceBundle> getResourceBundle() {
-        return Optional.of(ResourceBundle.getBundle("bayern.steinbrecher.wizard.bundles.Selection"));
-    }
 }
