@@ -176,7 +176,6 @@
         <connection>scm:git:ssh://git@github.com/TrackerSB/GenericWizard.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/TrackerSB/GenericWizard.git</developerConnection>
         <url>https://github.com/TrackerSB/GenericWizard</url>
-        <tag>v1.13</tag>
     </scm>
 
     <distributionManagement>
