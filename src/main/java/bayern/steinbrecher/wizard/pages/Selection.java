@@ -28,7 +28,8 @@ import java.util.Set;
  * @author Stefan Huber
  * @since 1.4
  */
-public class Selection<T extends Comparable<T>> extends WizardableView<Optional<Set<T>>, SelectionController<T>> {
+public class Selection<T extends Comparable<? extends T>>
+        extends WizardableView<Optional<Set<T>>, SelectionController<T>> {
 
     private final Set<T> options;
 

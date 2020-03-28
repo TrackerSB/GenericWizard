@@ -50,7 +50,7 @@ import javafx.scene.layout.Priority;
  * @author Stefan Huber
  * @since 1.4
  */
-public class SelectionController<T extends Comparable<T>> extends WizardableController<Optional<Set<T>>> {
+public class SelectionController<T extends Comparable<? extends T>> extends WizardableController<Optional<Set<T>>> {
 
     private final MapProperty<T, Optional<CheckBox>> optionsProperty
             = new SimpleMapProperty<>(FXCollections.observableHashMap());
