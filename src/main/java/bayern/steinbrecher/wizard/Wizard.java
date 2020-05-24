@@ -16,17 +16,18 @@
  */
 package bayern.steinbrecher.wizard;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import javafx.application.Application;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  * Represents a wizard for showing a sequence of {@code Pane}s. You can step back and forward on these {@code Panes} and
@@ -41,62 +42,50 @@ import javafx.stage.Stage;
  * @author Stefan Huber
  * @since 1.0
  */
-public class Wizard extends Application {
+public class Wizard {
 
-    private double xDragOffset;
-    private double yDragOffset;
-    private /* final */ WizardController controller;
-    private final Map<String, WizardPage<?>> pages;
+    private final WizardController controller;
+    private final Parent root;
 
-    /**
-     * Constructs a wizard with showing {@code pages} and using default stylesheet.
-     *
-     * @param pages The pages to show.
-     *
-     */
-    public Wizard(Map<String, WizardPage<?>> pages) {
+    private Wizard(WizardController controller, Parent root) {
         super();
-        this.pages = pages;
+        this.controller = controller;
+        this.root = root;
     }
 
-    /**
-     * Initializes the wizard. The wizard is not shown yet. NOTE: Add your own stylesheets only after calling this
-     * method.
-     *
-     * @param stage The stage to be used by the wizard.
-     * @throws java.io.IOException May be thrown when loading the wizard.
-     * @see FXMLLoader#load()
-     */
-    @Override
-    public void start(Stage stage) throws IOException {
+    @Contract("_ -> new")
+    @NotNull
+    public static Wizard create(@NotNull Map<String, WizardPage<?>> pages) {
+        Objects.requireNonNull(pages);
         FXMLLoader fxmlLoader = new FXMLLoader(Wizard.class.getResource("Wizard.fxml"),
-                ResourceBundle.getBundle("bayern.steinbrecher.wizard.bundles.Wizard"));
-        Parent root = fxmlLoader.load();
-        Scene scene = new Scene(root);
-        scene.setOnMousePressed(mevt -> {
-            xDragOffset = stage.getX() - mevt.getScreenX();
-            yDragOffset = stage.getY() - mevt.getScreenY();
-        });
-        scene.setOnMouseDragged(mevt -> {
-            stage.setX(mevt.getScreenX() + xDragOffset);
-            stage.setY(mevt.getScreenY() + yDragOffset);
-        });
-        stage.setScene(scene);
-        controller = fxmlLoader.getController();
-        controller.setStage(stage);
-        controller.setPages(pages);
+                ResourceBundle.getBundle("bayern.steinbrecher.wizard.Wizard"));
+        Parent root;
+        try {
+            root = fxmlLoader.load();
+        } catch (IOException ex) {
+            throw new Error("The internal implementation is erroneous", ex);
+        }
+        WizardController controller = fxmlLoader.getController();
+        controller.setVisitablePages(pages);
+        return new Wizard(controller, root);
     }
 
     /**
      * Adds the given page to the wizard and replaces pages with the same key but only if the page was not already
-     * visited. This method can be used if a page of the wizard is depending on the result of a previous one. NOTE: The
-     * size of {@code page} is not considered anymore after {@code start(...)} was called.
+     * visited. This method can be used if a page of the wizard is depending on the result of a previous one.
      *
-     * @param key The key the page is associated with.
+     * @param key  The key the page is associated with.
      * @param page The page to add to the wizard.
      */
-    public void put(String key, WizardPage<?> page) {
+    public void put(@NotNull String key, @NotNull WizardPage<?> page) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(page);
         controller.put(key, page);
+    }
+
+    @NotNull
+    public Parent getRoot() {
+        return root;
     }
 
     /**
@@ -105,6 +94,7 @@ public class Wizard extends Application {
      *
      * @return The property representing whether the wizard is finished.
      */
+    @NotNull
     public ReadOnlyBooleanProperty finishedProperty() {
         return controller.finishedProperty();
     }
@@ -122,28 +112,19 @@ public class Wizard extends Application {
     /**
      * Returns the results of all pages visited in a sequence to an end.
      *
-     * @return {@code Optional.empty()} only if the wizard is not finished yet, otherwise the results of the visited
+     * @return {@link Optional#empty} only if the wizard is not finished yet, otherwise the results of the visited
      * pages.
-     * @throws IllegalCallableException Only thrown if thrown by one of the result functions of the visited pages.
      */
+    @NotNull
     public Optional<Map<String, ?>> getResults() {
         return controller.getResults();
     }
 
-    /**
-     * Property containing a boolean value representing whether the current page shown is the first one.
-     *
-     * @return {@code true} only if the current page is the first one.
-     */
+    @NotNull
     public ReadOnlyBooleanProperty atBeginningProperty() {
         return controller.atBeginningProperty();
     }
 
-    /**
-     * Returns a boolean value representing whether the current page shown is the first one.
-     *
-     * @return {@code true} only if the current page is the first one.
-     */
     public boolean isAtBeginning() {
         return atBeginningProperty().get();
     }
@@ -153,6 +134,7 @@ public class Wizard extends Application {
      *
      * @return {@code true} only if the current page is a last one.
      */
+    @NotNull
     public ReadOnlyBooleanProperty atFinishProperty() {
         return controller.atFinishProperty();
     }
@@ -166,20 +148,12 @@ public class Wizard extends Application {
         return atFinishProperty().get();
     }
 
-    /**
-     * Returns the property holding the currently shown page.
-     *
-     * @return The property holding the currently shown page.
-     */
+    @NotNull
     public ReadOnlyProperty<WizardPage<?>> currentPageProperty() {
         return controller.currentPageProperty();
     }
 
-    /**
-     * Returns the currently shown page.
-     *
-     * @return The currently shown page.
-     */
+    @NotNull
     public WizardPage<?> getCurrentPage() {
         return currentPageProperty().getValue();
     }
