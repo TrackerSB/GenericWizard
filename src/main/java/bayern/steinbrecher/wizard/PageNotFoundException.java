@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,6 @@
 package bayern.steinbrecher.wizard;
 
 /**
- * Signals that a wizard page having a certain key could not be found.
- *
  * @author Stefan Huber
  * @since 1.0
  */
@@ -26,37 +24,18 @@ public class PageNotFoundException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructs an {@code PageNotFoundException} without detail message and no cause.
-     */
     public PageNotFoundException() {
         super();
     }
 
-    /**
-     * Constructs an {@code PageNotFoundException} with detail message but no cause.
-     *
-     * @param message The detail message to show.
-     */
     public PageNotFoundException(String message) {
         super(message);
     }
 
-    /**
-     * Constructs an {@code PageNotFoundException} with given detail message and cause.
-     *
-     * @param message The detail message to show.
-     * @param cause The cause of this exception.
-     */
     public PageNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    /**
-     * Constructs an {@code PageNotFoundException} without detail message but with given cause.
-     *
-     * @param cause The cause of this exception.
-     */
     public PageNotFoundException(Throwable cause) {
         super(cause);
     }

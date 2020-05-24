@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ module bayern.steinbrecher.GenericWizard {
     requires java.desktop;
     requires java.logging;
     requires javafx.controls;
+    requires org.jetbrains.annotations;
 
     exports bayern.steinbrecher.wizard;
     exports bayern.steinbrecher.wizard.pages;

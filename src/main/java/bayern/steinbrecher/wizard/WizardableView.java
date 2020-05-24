@@ -19,11 +19,17 @@ package bayern.steinbrecher.wizard;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.LoadException;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a class which can be in a {@link bayern.steinbrecher.wizard.Wizard}.
@@ -42,20 +48,28 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
     /**
      * @since 1.13
      */
-    public WizardableView(String fxmlPath, ResourceBundle bundle) {
+    public WizardableView(@NotNull String fxmlPath, @Nullable ResourceBundle bundle) {
+        Objects.requireNonNull(fxmlPath);
         this.fxmlPath = fxmlPath;
         this.bundle = bundle;
     }
 
-    private <P extends Parent> P loadFXML()
-            throws IOException {
+    private <P extends Parent> P loadFXML() throws LoadException {
         URL resource = getClass().getResource(fxmlPath);
         if (resource == null) {
-            throw new FileNotFoundException(
-                    "The class " + getClass().getName() + " can not find the resource " + fxmlPath);
+            throw new LoadException(
+                    new FileNotFoundException(
+                            String.format("The class %s can not find the resource %s", getClass().getName(), fxmlPath)
+                    )
+            );
         } else {
             FXMLLoader fxmlLoader = new FXMLLoader(resource, bundle);
-            P root = fxmlLoader.load();
+            P root;
+            try {
+                root = fxmlLoader.load();
+            } catch (IOException ex) {
+                throw new LoadException(ex);
+            }
             controller = fxmlLoader.getController();
             afterControllerInitialized();
             return root;
@@ -71,18 +85,17 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
     protected abstract void afterControllerInitialized();
 
     /**
-     * Creates a {@link WizardPage}.The nextFunction is set to {@code null} and isFinish is set to {@code false}.
+     * Creates a {@link WizardPage}. The nextFunction returns always {@code null} and isFinish is set to {@code false}.
      *
      * @return The newly created {@link WizardPage}. Returns {@code null} if the {@link WizardPage} could not be
      * created.
-     * @throws IOException {@link #loadFXML()}
      */
-    public WizardPage<T> getWizardPage() throws IOException {
-        WizardPage<T> page;
+    @NotNull
+    @Contract("-> new")
+    public WizardPage<T> getWizardPage() throws LoadException {
         Pane root = loadFXML();
-        page = new WizardPage<>(
-                root, null, false, () -> getController().getResult(), getController().validProperty());
-        return page;
+        return new WizardPage<>(
+                root, () -> null, false, () -> getController().getResult(), getController().validProperty());
     }
 
     public C getController() {

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,19 +16,6 @@
  */
 package bayern.steinbrecher.wizard;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import javafx.fxml.FXML;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
 import javafx.beans.property.MapProperty;
@@ -41,21 +28,32 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.HLineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
-import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Stack;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Contains the controller of the wizard.
- *
  * @author Stefan Huber
  * @since 1.0
  */
@@ -67,34 +65,29 @@ public final class WizardController {
      */
     private static final double MAX_SIZE_FACTOR = 0.8;
     private final StringProperty currentIndex = new SimpleStringProperty(this, "currentIndex");
-    /**
-     * NOTE The initial dummy page is needed since the current page may be already requested before there is a chance to
-     * specify the pages of the wizard.
+    /* FIXME The initial dummy page is needed since the current page may be already requested before there is a chance
+     * to specify the pages of the wizard.
      */
-    private final ReadOnlyObjectWrapper<WizardPage<?>> currentPage
-            = new ReadOnlyObjectWrapper<>(this, "currentPage", new WizardPage<Void>(null, null, false, () -> null));
-    private final MapProperty<String, WizardPage<?>> pages = new SimpleMapProperty<>();
+    private final ReadOnlyObjectWrapper<WizardPage<?>> currentPage = new ReadOnlyObjectWrapper<>(
+            this, "currentPage", new WizardPage<Void>(new Pane(), () -> null, false, () -> null));
+    private final MapProperty<String, WizardPage<?>> visitablePages = new SimpleMapProperty<>();
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
     private final ReadOnlyBooleanWrapper finished = new ReadOnlyBooleanWrapper(this, "finished", false);
+    private final ReadOnlyBooleanWrapper aborted = new ReadOnlyBooleanWrapper(this, "aborted", false);
     private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(this, "swiping", false);
     private final Stack<String> history = new Stack<>();
     @FXML
     private ScrollPane scrollContent;
     @FXML
     private StackPane contents;
-    @FXML
-    private ButtonBar controls;
-    private Stage stage;
-    private double xDragOffset;
-    private double yDragOffset;
     private static final String WIZARD_CONTENT_STYLECLASS = "wizard-content";
     private static final Duration SWIPE_DURATION = Duration.seconds(0.75);
 
     @FXML
     @SuppressWarnings("unused")
     private void initialize() {
-        pages.addListener((obs, oldVal, newVal) -> {
+        visitablePages.addListener((obs, oldVal, newVal) -> {
             newVal.values().stream()
                     .map(WizardPage::getRoot)
                     .forEach(pane -> {
@@ -102,7 +95,7 @@ public final class WizardController {
                         VBox.setVgrow(pane, Priority.ALWAYS);
                     });
             currentIndex.addListener((obsI, oldValI, newValI) -> {
-                WizardPage<?> newPage = pages.get(newValI);
+                WizardPage<?> newPage = visitablePages.get(newValI);
                 atFinish.set(newPage.isFinish());
                 currentPage.setValue(newPage);
             });
@@ -110,22 +103,6 @@ public final class WizardController {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         scrollContent.setMaxHeight(screenSize.getHeight() * MAX_SIZE_FACTOR);
         scrollContent.setMaxWidth(screenSize.getWidth() * MAX_SIZE_FACTOR);
-        contents.setOnMousePressed(mevt -> {
-            xDragOffset = stage.getX() - mevt.getScreenX();
-            yDragOffset = stage.getY() - mevt.getScreenY();
-        });
-        contents.setOnMouseDragged(mevt -> {
-            stage.setX(mevt.getScreenX() + xDragOffset);
-            stage.setY(mevt.getScreenY() + yDragOffset);
-        });
-        controls.setOnMousePressed(mevt -> {
-            xDragOffset = stage.getX() - mevt.getScreenX();
-            yDragOffset = stage.getY() - mevt.getScreenY();
-        });
-        controls.setOnMouseDragged(mevt -> {
-            stage.setX(mevt.getScreenX() + xDragOffset);
-            stage.setY(mevt.getScreenY() + yDragOffset);
-        });
     }
 
     @FXML
@@ -135,7 +112,7 @@ public final class WizardController {
             history.pop(); //Pop current index
             atBeginning.set(history.size() < 2);
             currentIndex.set(history.peek());
-            updatePage(Optional.of(false));
+            updatePage(false);
         }
     }
 
@@ -144,25 +121,17 @@ public final class WizardController {
     private void showNext() {
         if (currentPage.getValue().isValid() && !changingPage.get()) {
             WizardPage<?> page = currentPage.getValue();
-            Callable<String> nextFunction = page.getNextFunction();
+            Supplier<String> nextFunction = page.getNextFunction();
             if (page.isHasNextFunction() && page.isValid()) {
-                try {
-                    String nextIndex = nextFunction.call();
-                    if (!pages.containsKey(nextIndex)) {
-                        throw new PageNotFoundException(
-                                "Wizard contains no page with key \""
-                                + nextIndex + "\".");
-                    }
-                    currentIndex.set(nextIndex);
-                    history.push(currentIndex.get());
-                    atBeginning.set(false);
-                    updatePage(Optional.of(true));
-                } catch (Exception ex) {
-                    throw new IllegalCallableException(
-                            "A valid function or a next function of page \""
-                            + currentIndex.get() + "\" has thrown an exception",
-                            ex);
+                String nextIndex = nextFunction.get();
+                if (!visitablePages.containsKey(nextIndex)) {
+                    throw new PageNotFoundException(
+                            String.format("Wizard contains no page with key \"%s\".", nextIndex));
                 }
+                currentIndex.set(nextIndex);
+                history.push(currentIndex.get());
+                atBeginning.set(false);
+                updatePage(true);
             }
         }
     }
@@ -172,45 +141,34 @@ public final class WizardController {
     private void finish() {
         if (currentPage.getValue().isValid() && atFinish.get()) {
             finished.set(true);
-            stage.close();
         }
     }
 
-    /**
-     * Sets the {@link Stage} this controller has to use.
-     *
-     * @param stage The {@link Stage} to use.
-     */
-    void setStage(Stage stage) {
-        this.stage = stage;
+    @FXML
+    @SuppressWarnings("unused")
+    private void cancel() {
+        aborted.set(true);
+    }
+
+    @NotNull
+    public MapProperty<String, WizardPage<?>> visitablePagesProperty() {
+        return visitablePages;
+    }
+
+    @NotNull
+    public Map<String, WizardPage<?>> getVisitablePages() {
+        return visitablePages.get();
     }
 
     /**
-     * Returns the property holding all pages visitable.
-     *
-     * @return The property holding all pages visitable.
+     * @param swipeToLeft {@code null} == dont swipe, just change; {@code true} == swipe to left; {@code false} == swipe
+     *                    to right
      */
-    public MapProperty<String, WizardPage<?>> pagesProperty() {
-        return pages;
-    }
-
-    /**
-     * Returns all visitable pages.
-     *
-     * @return All visitable pages.
-     */
-    public Map<String, WizardPage<?>> getPages() {
-        return pages.get();
-    }
-
-    //Optional#empty() == dont swipe, just change
-    //true == swipe to left
-    //false == swipe to right
-    private void updatePage(Optional<Boolean> swipeToLeft) {
+    private void updatePage(@Nullable Boolean swipeToLeft) {
         changingPage.set(true);
         ObservableList<Node> addedContents = contents.getChildren();
         Optional<Node> optCurrentPane = Optional.ofNullable(addedContents.isEmpty() ? null : addedContents.get(0));
-        assert !optCurrentPane.isPresent()
+        assert optCurrentPane.isEmpty()
                 || optCurrentPane.get() instanceof Pane : "The current content of this wizard is not a pane.";
         Consumer<Node> removeCurrentPane = currentPane -> {
             currentPane.getStyleClass().remove(WIZARD_CONTENT_STYLECLASS);
@@ -219,13 +177,16 @@ public final class WizardController {
             }
         };
 
-        Pane nextPane = pages.get(currentIndex.get()).getRoot();
-        if (!optCurrentPane.isPresent() || optCurrentPane.get() != nextPane) {
+        Pane nextPane = visitablePages.get(currentIndex.get()).getRoot();
+        if (optCurrentPane.isEmpty() || optCurrentPane.get() != nextPane) {
             contents.getChildren().add(nextPane);
             nextPane.getStyleClass().add(WIZARD_CONTENT_STYLECLASS);
         }
 
-        swipeToLeft.ifPresentOrElse(swipeLeft -> {
+        if (swipeToLeft == null) {
+            optCurrentPane.ifPresent(removeCurrentPane);
+            changingPage.set(false);
+        } else {
             double halfParentWidth = nextPane.getParent().getLayoutBounds().getWidth() / 2;
             double halfParentHeight = nextPane.getParent().getLayoutBounds().getHeight() / 2;
             double marginInScene = nextPane.getScene().getWidth() / 2 - halfParentWidth;
@@ -237,7 +198,7 @@ public final class WizardController {
             ParallelTransition overallTrans = new ParallelTransition();
 
             //Swipe new element in
-            MoveTo initialMoveIn = new MoveTo(swipeLeft ? xRightOuter : xLeftOuter, halfParentHeight);
+            MoveTo initialMoveIn = new MoveTo(swipeToLeft ? xRightOuter : xLeftOuter, halfParentHeight);
             HLineTo hlineIn = new HLineTo(halfParentWidth);
             Path pathIn = new Path(initialMoveIn, hlineIn);
             PathTransition pathTransIn = new PathTransition(SWIPE_DURATION, pathIn, nextPane);
@@ -246,7 +207,7 @@ public final class WizardController {
             optCurrentPane.ifPresent(currentPane -> {
                 //Swipe old element out
                 MoveTo initialMoveOut = new MoveTo(halfParentWidth, halfParentHeight);
-                HLineTo hlineOut = new HLineTo(swipeLeft ? xLeftOuter : xRightOuter);
+                HLineTo hlineOut = new HLineTo(swipeToLeft ? xLeftOuter : xRightOuter);
                 Path pathOut = new Path(initialMoveOut, hlineOut);
                 PathTransition pathTransOut = new PathTransition(SWIPE_DURATION, pathOut, currentPane);
                 pathTransOut.setOnFinished(aevt -> removeCurrentPane.accept(currentPane));
@@ -255,29 +216,26 @@ public final class WizardController {
 
             overallTrans.setOnFinished(aevt -> changingPage.set(false));
             overallTrans.playFromStart();
-        }, () -> {
-            optCurrentPane.ifPresent(currentPane -> removeCurrentPane.accept(currentPane));
-            changingPage.set(false);
-        });
+        }
     }
 
     /**
      * Sets a new map of visitable pages. NOTE: Calling this method causes the wizard to reset to the first page and
      * clear the history.
      *
-     * @param pages The map of pages to set.
+     * @param visitablePages The map of pages to set.
      */
-    public void setPages(Map<String, WizardPage<?>> pages) {
-        if (!pages.containsKey(WizardPage.FIRST_PAGE_KEY)) {
+    public void setVisitablePages(@NotNull Map<String, WizardPage<?>> visitablePages) {
+        if (!visitablePages.containsKey(WizardPage.FIRST_PAGE_KEY)) {
             throw new IllegalArgumentException("Map of pages must have a key WizardPage.FIRST_PAGE_KEY");
         }
 
         currentIndex.set(WizardPage.FIRST_PAGE_KEY);
-        this.pages.set(FXCollections.observableMap(pages));
-        currentPage.setValue(pages.get(WizardPage.FIRST_PAGE_KEY));
+        this.visitablePages.set(FXCollections.observableMap(visitablePages));
+        currentPage.setValue(visitablePages.get(WizardPage.FIRST_PAGE_KEY));
         history.clear();
         history.push(WizardPage.FIRST_PAGE_KEY);
-        updatePage(Optional.empty());
+        updatePage(null);
     }
 
     /**
@@ -285,14 +243,14 @@ public final class WizardController {
      * visited. This method can be used if a page of the wizard is depending on the result of a previous one. NOTE: The
      * size of {@code page} is not considered anymore after {@code start(...)} was called.
      *
-     * @param key The key the page is associated with.
+     * @param key  The key the page is associated with.
      * @param page The page to add to the wizard.
      */
-    public void put(String key, WizardPage<?> page) {
+    public void put(@NotNull String key, @NotNull WizardPage<?> page) {
         if (history.contains(key)) {
             throw new IllegalStateException("A page already visited can not be replaced");
         }
-        pages.put(key, page);
+        visitablePages.put(key, page);
     }
 
     /**
@@ -301,6 +259,7 @@ public final class WizardController {
      *
      * @return The property representing whether the wizard is finished.
      */
+    @NotNull
     public ReadOnlyBooleanProperty finishedProperty() {
         return finished.getReadOnlyProperty();
     }
@@ -315,20 +274,11 @@ public final class WizardController {
         return finishedProperty().getValue();
     }
 
-    /**
-     * Property containing a boolean value representing whether the current page shown is the first one.
-     *
-     * @return {@code true} only if the current page is the first one.
-     */
+    @NotNull
     public ReadOnlyBooleanProperty atBeginningProperty() {
         return atBeginning.getReadOnlyProperty();
     }
 
-    /**
-     * Returns a boolean value representing whether the current page shown is the first one.
-     *
-     * @return {@code true} only if the current page is the first one.
-     */
     public boolean isAtBeginning() {
         return atBeginningProperty().getValue();
     }
@@ -338,6 +288,7 @@ public final class WizardController {
      *
      * @return {@code true} only if the current page is a last one.
      */
+    @NotNull
     public ReadOnlyBooleanProperty atFinishProperty() {
         return atFinish.getReadOnlyProperty();
     }
@@ -351,20 +302,12 @@ public final class WizardController {
         return atFinishProperty().getValue();
     }
 
-    /**
-     * Returns the property holding the currently shown page.
-     *
-     * @return The property holding the currently shown page.
-     */
+    @NotNull
     public ReadOnlyObjectProperty<WizardPage<?>> currentPageProperty() {
         return currentPage.getReadOnlyProperty();
     }
 
-    /**
-     * Returns the currently shown page.
-     *
-     * @return The currently shown page.
-     */
+    @NotNull
     public WizardPage<?> getCurrentPage() {
         return currentPageProperty().getValue();
     }
@@ -374,6 +317,7 @@ public final class WizardController {
      *
      * @return The property holding whether the current page is currently changed.
      */
+    @NotNull
     public ReadOnlyBooleanProperty changingPageProperty() {
         return changingPage.getReadOnlyProperty();
     }
@@ -387,26 +331,28 @@ public final class WizardController {
         return changingPageProperty().getValue();
     }
 
+    @NotNull
+    public ReadOnlyBooleanWrapper abortedProperty() {
+        return aborted;
+    }
+
+    public boolean isAborted() {
+        return abortedProperty().get();
+    }
+
     /**
      * Returns the results of all pages visited in a sequence to an end.
      *
      * @return {@code Optional.empty()} only if the wizard is not finished yet, otherwise the results of the visited
      * pages.
-     * @throws IllegalCallableException Only thrown if thrown by one of the result functions of the visited pages.
      */
+    @NotNull
     public Optional<Map<String, ?>> getResults() {
         Optional<Map<String, ?>> resultsResult;
         if (isFinished()) {
             Map<String, Object> results = new HashMap<>();
             history.forEach(key -> {
-                try {
-                    results.put(key, pages.get(key).getResultFunction().call());
-                } catch (Exception ex) {
-                    throw new IllegalCallableException(
-                            "The result function of wizard page \""
-                            + key
-                            + "\" has thrown an exception", ex);
-                }
+                results.put(key, visitablePages.get(key).getResultFunction().get());
             });
             resultsResult = Optional.of(results);
         } else {

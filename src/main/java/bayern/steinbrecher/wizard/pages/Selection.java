@@ -17,13 +17,14 @@
 package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.wizard.WizardableView;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
- * Represents a selection dialog.
- *
  * @param <T> The type of the attributes being able to select.
  * @author Stefan Huber
  * @since 1.4
@@ -34,19 +35,15 @@ public class Selection<T extends Comparable<? extends T>>
     private final Set<T> options;
 
     /**
-     * Creates a new Frame representing the given options as selectable {@link javafx.scene.control.CheckBox} es and
-     * representing a {@link javafx.scene.control.TextField} for entering a number.
-     *
-     * @param options The options the user is allowed to select.
+     * Creates a new page which represents each given option as selectable {@link javafx.scene.control.CheckBox} and
+     * adds a search box which allows to filter the visible options.
      */
-    public Selection(Set<T> options) {
-        super("Selection.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.bundles.Selection"));
+    public Selection(@NotNull Set<T> options) {
+        super("Selection.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.pages.Selection"));
+        Objects.requireNonNull(options);
         this.options = options;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void afterControllerInitialized() {
         getController().setOptions(options);

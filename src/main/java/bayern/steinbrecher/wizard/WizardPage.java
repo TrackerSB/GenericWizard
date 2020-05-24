@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Stefan Huber
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,21 +16,24 @@
  */
 package bayern.steinbrecher.wizard;
 
-import java.util.Objects;
-import java.util.concurrent.Callable;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Represents a page of the wizard.
  *
- * @author Stefan Huber
  * @param <T> The return type of the result represented by the page.
+ * @author Stefan Huber
  * @since 1.0
  */
 public final class WizardPage<T> {
@@ -42,21 +45,26 @@ public final class WizardPage<T> {
     private final ReadOnlyBooleanWrapper valid = new ReadOnlyBooleanWrapper(this, "valid");
     private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
     private final Pane root;
-    private final Property<Callable<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
+    private final Property<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
     private boolean finish;
-    private final Callable<T> resultFunction;
+    private final Supplier<T> resultFunction;
 
     /**
      * Creates a new page with given params.
      *
-     * @param root The root pane containing all controls.
-     * @param nextFunction The function calculating the name of th enext page.
-     * @param finish {@code true} only if this page is a last one.
+     * @param root           The root pane containing all controls.
+     * @param nextFunction   The function calculating the name of th next page.
+     * @param finish         {@code true} only if this page is a last one.
      * @param resultFunction The function calculating the result this page represents.
-     * @param valid A binding to bind this pages {@code valid} property to.
+     * @param valid          A binding to bind this pages {@code valid} property to.
      */
-    public WizardPage(Pane root, Callable<String> nextFunction, boolean finish,
-            Callable<T> resultFunction, ObservableValue<? extends Boolean> valid) {
+    public WizardPage(@NotNull Pane root, @NotNull Supplier<String> nextFunction, boolean finish,
+                      @NotNull Supplier<T> resultFunction, @NotNull ObservableValue<? extends Boolean> valid) {
+        Objects.requireNonNull(root);
+        Objects.requireNonNull(nextFunction);
+        Objects.requireNonNull(resultFunction);
+        Objects.requireNonNull(valid);
+
         this.root = root;
         this.nextFunction.addListener((obs, oldVal, newVal) -> {
             hasNextFunction.set(newVal != null);
@@ -70,13 +78,13 @@ public final class WizardPage<T> {
     /**
      * Creates a new page with given params. The {@code valid} property always contains {@code true}.
      *
-     * @param root The root pane containing all controls.
-     * @param nextFunction The function calculating the name of the next page.
-     * @param finish {@code true} only if this page is a last one.
+     * @param root           The root pane containing all controls.
+     * @param nextFunction   The function calculating the name of the next page.
+     * @param finish         {@code true} only if this page is a last one.
      * @param resultFunction The function calculating the result this page represents.
      */
-    public WizardPage(Pane root, Callable<String> nextFunction, boolean finish,
-            Callable<T> resultFunction) {
+    public WizardPage(@NotNull Pane root, @NotNull Supplier<String> nextFunction, boolean finish,
+                      @NotNull Supplier<T> resultFunction) {
         this(root, nextFunction, finish, resultFunction, new SimpleBooleanProperty(true));
     }
 
@@ -85,6 +93,7 @@ public final class WizardPage<T> {
      *
      * @return The pane containing all controls.
      */
+    @NotNull
     public Pane getRoot() {
         return root;
     }
@@ -94,7 +103,8 @@ public final class WizardPage<T> {
      *
      * @return The property containing the function calculating which page to show next.
      */
-    public Property<Callable<String>> nextFunctionProperty() {
+    @NotNull
+    public ReadOnlyProperty<Supplier<String>> nextFunctionProperty() {
         return nextFunction;
     }
 
@@ -103,8 +113,9 @@ public final class WizardPage<T> {
      *
      * @return The function calculating the key of the next page. Returns {@code null} if this page has no next one.
      */
-    public Callable<String> getNextFunction() {
-        return nextFunction.getValue();
+    @NotNull
+    public Supplier<String> getNextFunction() {
+        return nextFunctionProperty().getValue();
     }
 
     /**
@@ -112,7 +123,8 @@ public final class WizardPage<T> {
      *
      * @param nextFunction The function calculating the key of the next page.
      */
-    public void setNextFunction(Callable<String> nextFunction) {
+    public void setNextFunction(@NotNull Supplier<String> nextFunction) {
+        Objects.requireNonNull(nextFunction);
         this.nextFunction.setValue(nextFunction);
     }
 
@@ -139,7 +151,8 @@ public final class WizardPage<T> {
      *
      * @return The function calculating the result this page represents.
      */
-    public Callable<T> getResultFunction() {
+    @NotNull
+    public Supplier<T> getResultFunction() {
         return resultFunction;
     }
 
@@ -148,7 +161,7 @@ public final class WizardPage<T> {
      *
      * @param validBinding A new binding to bind this pages {@link #valid} property to.
      */
-    public void setValidBinding(ObservableValue<? extends Boolean> validBinding) {
+    public void setValidBinding(@NotNull ObservableValue<? extends Boolean> validBinding) {
         this.valid.bind(validBinding);
     }
 
@@ -157,6 +170,7 @@ public final class WizardPage<T> {
      *
      * @return The property representing whether this page has valid input.
      */
+    @NotNull
     public ReadOnlyBooleanProperty validProperty() {
         return valid.getReadOnlyProperty();
     }
@@ -167,7 +181,7 @@ public final class WizardPage<T> {
      * @return {@code true} only if the current input of this page is valid.
      */
     public boolean isValid() {
-        return valid.get();
+        return validProperty().get();
     }
 
     /**
@@ -176,6 +190,7 @@ public final class WizardPage<T> {
      * @return The property holding {@code true} only if this page has a {@code nextFunction}.
      * @see #nextFunctionProperty()
      */
+    @NotNull
     public ReadOnlyBooleanProperty hasNextFunctionProperty() {
         return hasNextFunction.getReadOnlyProperty();
     }
@@ -187,6 +202,6 @@ public final class WizardPage<T> {
      * @see #nextFunctionProperty()
      */
     public boolean isHasNextFunction() {
-        return hasNextFunction.get();
+        return hasNextFunctionProperty().get();
     }
 }

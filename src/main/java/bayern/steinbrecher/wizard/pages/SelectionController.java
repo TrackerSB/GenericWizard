@@ -17,11 +17,13 @@
 package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.wizard.WizardableController;
+
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.MapProperty;
@@ -42,6 +44,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents controller for Selection.fxml.
@@ -86,7 +89,7 @@ public class SelectionController<T extends Comparable<? extends T>> extends Wiza
         optionsListView.itemsProperty().bind(new SimpleObjectProperty<>(filteredListItems));
         optionsProperty.addListener((obs, oldVal, newVal) -> {
             newVal.entrySet().stream()
-                    .filter(entry -> !entry.getValue().isPresent())
+                    .filter(entry -> entry.getValue().isEmpty())
                     .forEach(entry -> {
                         CheckBox newItem = new CheckBox(entry.getKey().toString());
                         newItem.selectedProperty().addListener(selectionChange);
@@ -105,7 +108,7 @@ public class SelectionController<T extends Comparable<? extends T>> extends Wiza
                         return item == null
                                 || item.isBlank()
                                 || item.toLowerCase(Locale.ROOT)
-                                        .contains(newVal.toLowerCase(Locale.ROOT));
+                                .contains(newVal.toLowerCase(Locale.ROOT));
                     });
                 });
 
@@ -117,7 +120,7 @@ public class SelectionController<T extends Comparable<? extends T>> extends Wiza
      *
      * @param options The list of new options.
      */
-    public void setOptions(Set<T> options) {
+    public void setOptions(@NotNull Set<T> options) {
         optionsProperty.set(FXCollections.observableMap(
                 options.stream().collect(Collectors.toMap(op -> op, op -> Optional.empty()))));
     }
@@ -126,7 +129,6 @@ public class SelectionController<T extends Comparable<? extends T>> extends Wiza
     @SuppressWarnings("unused")
     private void selectAllOptions() {
         optionsListView.getItems()
-                .stream()
                 .forEach(cb -> Platform.runLater(() -> cb.setSelected(true)));
     }
 
@@ -134,13 +136,9 @@ public class SelectionController<T extends Comparable<? extends T>> extends Wiza
     @SuppressWarnings("unused")
     private void selectNoOption() {
         optionsListView.getItems()
-                .stream()
                 .forEach(cb -> Platform.runLater(() -> cb.setSelected(false)));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Optional<Set<T>> calculateResult() {
         Set<T> selection = new HashSet<>();
@@ -154,74 +152,38 @@ public class SelectionController<T extends Comparable<? extends T>> extends Wiza
         return Optional.of(selection);
     }
 
-    /**
-     * Returns the property representing the number of currently selected fields.
-     *
-     * @return The property representing the number of currently selected fields.
-     */
+    @NotNull
     public ReadOnlyIntegerProperty selectedCountProperty() {
         return selectedCount.getReadOnlyProperty();
     }
 
-    /**
-     * Returns the number of currently selected fields.
-     *
-     * @return The number of currently selected fields.
-     */
     public int getSelectedCount() {
         return selectedCount.get();
     }
 
-    /**
-     * Returns the property representing the total number of entries to select.
-     *
-     * @return The property representing the total number of entries to select.
-     */
+    @NotNull
     public ReadOnlyIntegerProperty totalCountProperty() {
         return totalCount;
     }
 
-    /**
-     * The total number of entries to select.
-     *
-     * @return The total number of entries to select.
-     */
     public int getTotalCount() {
         return totalCount.get();
     }
 
-    /**
-     * Returns the property representing a boolean indicating whether no entry is currently selected.
-     *
-     * @return The property representing a boolean indicating whether no entry is currently selected.
-     */
+    @NotNull
     public ReadOnlyBooleanProperty nothingSelectedProperty() {
         return nothingSelected.getReadOnlyProperty();
     }
 
-    /**
-     * Checks whether currently no entry is selected.
-     *
-     * @return {@code true} only if no entry is selected.
-     */
     public boolean isNothingSelected() {
         return nothingSelected.get();
     }
 
-    /**
-     * Returns the property representing a boolean indicating whether every entry is currently selected.
-     *
-     * @return The property representing a boolean indicating whether every entry is currently selected.
-     */
+    @NotNull
     public ReadOnlyBooleanProperty allSelectedProperty() {
         return allSelected.getReadOnlyProperty();
     }
 
-    /**
-     * Checks whether currently every entry is selected.
-     *
-     * @return {@code true} only if every entry is selected.
-     */
     public boolean isAllSelected() {
         return allSelected.get();
     }
