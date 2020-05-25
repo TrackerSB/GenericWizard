@@ -44,7 +44,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.util.HashMap;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
@@ -73,8 +73,8 @@ public final class WizardController {
     private final MapProperty<String, WizardPage<?>> visitablePages = new SimpleMapProperty<>();
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
-    private final ReadOnlyBooleanWrapper finished = new ReadOnlyBooleanWrapper(this, "finished", false);
-    private final ReadOnlyBooleanWrapper aborted = new ReadOnlyBooleanWrapper(this, "aborted", false);
+    private final ReadOnlyObjectWrapper<WizardState> state
+            = new ReadOnlyObjectWrapper<>(this, "state", WizardState.RUNNING);
     private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(this, "swiping", false);
     private final Stack<String> history = new Stack<>();
     @FXML
@@ -108,7 +108,7 @@ public final class WizardController {
     @FXML
     @SuppressWarnings("unused")
     private void showPrevious() {
-        if (!atBeginning.get() && !changingPage.get()) {
+        if (!isAtBeginning() && !isChangingPage()) {
             history.pop(); //Pop current index
             atBeginning.set(history.size() < 2);
             currentIndex.set(history.peek());
@@ -119,17 +119,17 @@ public final class WizardController {
     @FXML
     @SuppressWarnings("unused")
     private void showNext() {
-        if (currentPage.getValue().isValid() && !changingPage.get()) {
-            WizardPage<?> page = currentPage.getValue();
+        if (getCurrentPage().isValid() && !isChangingPage()) {
+            WizardPage<?> page = getCurrentPage();
             Supplier<String> nextFunction = page.getNextFunction();
             if (page.isHasNextFunction() && page.isValid()) {
                 String nextIndex = nextFunction.get();
-                if (!visitablePages.containsKey(nextIndex)) {
+                if (!getVisitablePages().containsKey(nextIndex)) {
                     throw new PageNotFoundException(
                             String.format("Wizard contains no page with key \"%s\".", nextIndex));
                 }
                 currentIndex.set(nextIndex);
-                history.push(currentIndex.get());
+                history.push(nextIndex);
                 atBeginning.set(false);
                 updatePage(true);
             }
@@ -139,15 +139,17 @@ public final class WizardController {
     @FXML
     @SuppressWarnings("unused")
     private void finish() {
-        if (currentPage.getValue().isValid() && atFinish.get()) {
-            finished.set(true);
+        if (getState() == WizardState.RUNNING && currentPage.getValue().isValid() && atFinish.get()) {
+            state.set(WizardState.FINISHED);
         }
     }
 
     @FXML
     @SuppressWarnings("unused")
     private void cancel() {
-        aborted.set(true);
+        if (getState() == WizardState.RUNNING) {
+            state.set(WizardState.ABORTED);
+        }
     }
 
     @NotNull
@@ -177,7 +179,9 @@ public final class WizardController {
             }
         };
 
-        Pane nextPane = visitablePages.get(currentIndex.get()).getRoot();
+        Pane nextPane = getVisitablePages()
+                .get(currentIndex.get())
+                .getRoot();
         if (optCurrentPane.isEmpty() || optCurrentPane.get() != nextPane) {
             contents.getChildren().add(nextPane);
             nextPane.getStyleClass().add(WIZARD_CONTENT_STYLECLASS);
@@ -253,27 +257,6 @@ public final class WizardController {
         visitablePages.put(key, page);
     }
 
-    /**
-     * Returns the property representing whether the wizard is finished. NOTE: It is not finished when it was closed
-     * without using the "finish" button.
-     *
-     * @return The property representing whether the wizard is finished.
-     */
-    @NotNull
-    public ReadOnlyBooleanProperty finishedProperty() {
-        return finished.getReadOnlyProperty();
-    }
-
-    /**
-     * Checks whether the wizard is finished. NOTE: It is not finished when it was closed without using the "finish"
-     * button.
-     *
-     * @return {@code true} only if the wizard is finished.
-     */
-    public boolean isFinished() {
-        return finishedProperty().getValue();
-    }
-
     @NotNull
     public ReadOnlyBooleanProperty atBeginningProperty() {
         return atBeginning.getReadOnlyProperty();
@@ -332,32 +315,20 @@ public final class WizardController {
     }
 
     @NotNull
-    public ReadOnlyBooleanWrapper abortedProperty() {
-        return aborted;
+    public ReadOnlyObjectProperty<WizardState> stateProperty() {
+        return state.getReadOnlyProperty();
     }
 
-    public boolean isAborted() {
-        return abortedProperty().get();
+    @NotNull
+    public WizardState getState() {
+        return stateProperty().get();
     }
 
     /**
-     * Returns the results of all pages visited in a sequence to an end.
-     *
-     * @return {@code Optional.empty()} only if the wizard is not finished yet, otherwise the results of the visited
-     * pages.
+     * Returns a list of all visited pages if the wizard finished.
      */
     @NotNull
-    public Optional<Map<String, ?>> getResults() {
-        Optional<Map<String, ?>> resultsResult;
-        if (isFinished()) {
-            Map<String, Object> results = new HashMap<>();
-            history.forEach(key -> {
-                results.put(key, visitablePages.get(key).getResultFunction().get());
-            });
-            resultsResult = Optional.of(results);
-        } else {
-            resultsResult = Optional.empty();
-        }
-        return resultsResult;
+    public Optional<Enumeration<String>> getVisitedPages() {
+        return Optional.ofNullable(getState() == WizardState.FINISHED ? history.elements() : null);
     }
 }

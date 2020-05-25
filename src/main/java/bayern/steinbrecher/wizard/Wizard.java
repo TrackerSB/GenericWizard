@@ -17,6 +17,7 @@
 package bayern.steinbrecher.wizard;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -88,36 +90,22 @@ public class Wizard {
         return root;
     }
 
-    /**
-     * Returns the property representing whether the wizard is finished. NOTE: It is not finished when it was closed
-     * without using the "finish" button.
-     *
-     * @return The property representing whether the wizard is finished.
-     */
     @NotNull
-    public ReadOnlyBooleanProperty finishedProperty() {
-        return controller.finishedProperty();
+    public ReadOnlyObjectProperty<WizardState> stateProperty() {
+        return controller.stateProperty();
+    }
+
+    @NotNull
+    public WizardState getState() {
+        return controller.getState();
     }
 
     /**
-     * Checks whether the wizard is finished. NOTE: It is not finished when it was closed without using the "finish"
-     * button.
-     *
-     * @return {@code true} only if the wizard is finished.
-     */
-    public boolean isFinished() {
-        return controller.isFinished();
-    }
-
-    /**
-     * Returns the results of all pages visited in a sequence to an end.
-     *
-     * @return {@link Optional#empty} only if the wizard is not finished yet, otherwise the results of the visited
-     * pages.
+     * Returns the list of visited pages if the wizard finished.
      */
     @NotNull
-    public Optional<Map<String, ?>> getResults() {
-        return controller.getResults();
+    public Optional<Enumeration<String>> getVisitedPages() {
+        return controller.getVisitedPages();
     }
 
     @NotNull
