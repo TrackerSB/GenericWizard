@@ -66,8 +66,7 @@ public final class WizardPage<T> {
         this.nextFunction.addListener((obs, oldVal, newVal) -> {
             hasNextFunction.set(newVal != null);
         });
-        setNextFunction(nextFunction);
-        setFinish(finish);
+        makeFinishPage(finish, nextFunction);
         this.resultFunction = Objects.requireNonNull(resultFunction, "The resultFunction must not be zero.");
         setValidBinding(valid);
     }
@@ -117,20 +116,6 @@ public final class WizardPage<T> {
     }
 
     /**
-     * Sets a new function calculating the key of the next page.
-     *
-     * @param nextFunction The function calculating the key of the next page. Only in case this page is a last one
-     *                     {@code null} is allowed.
-     */
-    public void setNextFunction(@Nullable Supplier<String> nextFunction) {
-        if (!isFinish()) {
-            Objects.requireNonNull(nextFunction,
-                    "A non-last page is required to define function which calculates the next page.");
-        }
-        this.nextFunction.setValue(nextFunction);
-    }
-
-    /**
      * Returns whether this page is a last one.
      *
      * @return {@code true} only if this page is a last one.
@@ -139,13 +124,18 @@ public final class WizardPage<T> {
         return finish;
     }
 
-    /**
-     * Changes whether this page is a last one.
-     *
-     * @param finish {@code true} if this page has to be a last one.
+    /*
+     * @param finish         {@code true} only if this page is a last one.
+     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
+     *                       {@code true} this value is allowed to be {@code null}.
      */
-    public void setFinish(boolean finish) {
+    public void makeFinishPage(boolean finish, @Nullable Supplier<String> nextFunction) {
+        if (!finish) {
+            Objects.requireNonNull(nextFunction,
+                    "A non-last page must define a function which calculates the next page.");
+        }
         this.finish = finish;
+        this.nextFunction.setValue(nextFunction);
     }
 
     /**
