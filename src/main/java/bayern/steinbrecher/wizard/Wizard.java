@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -104,7 +104,7 @@ public class Wizard {
      * Returns the list of visited pages if the wizard finished.
      */
     @NotNull
-    public Optional<Enumeration<String>> getVisitedPages() {
+    public Optional<ArrayList<String>> getVisitedPages() {
         return controller.getVisitedPages();
     }
 

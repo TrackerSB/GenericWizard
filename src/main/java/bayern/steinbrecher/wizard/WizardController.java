@@ -44,7 +44,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
@@ -328,7 +329,7 @@ public final class WizardController {
      * Returns a list of all visited pages if the wizard finished.
      */
     @NotNull
-    public Optional<Enumeration<String>> getVisitedPages() {
-        return Optional.ofNullable(getState() == WizardState.FINISHED ? history.elements() : null);
+    public Optional<ArrayList<String>> getVisitedPages() {
+        return Optional.ofNullable(getState() == WizardState.FINISHED ? Collections.list(history.elements()) : null);
     }
 }
