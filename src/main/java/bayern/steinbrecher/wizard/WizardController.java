@@ -125,7 +125,7 @@ public final class WizardController {
             Supplier<String> nextFunction = page.getNextFunction();
             if (page.isHasNextFunction() && page.isValid()) {
                 String nextIndex = nextFunction.get();
-                if (!getVisitablePages().containsKey(nextIndex)) {
+                if (nextIndex == null || !getVisitablePages().containsKey(nextIndex)) {
                     throw new PageNotFoundException(
                             String.format("Wizard contains no page with key \"%s\".", nextIndex));
                 }
