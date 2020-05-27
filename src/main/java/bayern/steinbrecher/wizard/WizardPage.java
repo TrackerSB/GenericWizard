@@ -25,6 +25,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -53,15 +54,19 @@ public final class WizardPage<T> {
      * Creates a new page with given params.
      *
      * @param root           The root pane containing all controls.
-     * @param nextFunction   The function calculating the name of th next page.
+     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
+     *                       {@code true} this value is allowed to be {@code null}.
      * @param finish         {@code true} only if this page is a last one.
      * @param resultFunction The function calculating the result this page represents.
      * @param valid          A binding to bind this pages {@code valid} property to.
      */
-    public WizardPage(@NotNull Pane root, @NotNull Supplier<String> nextFunction, boolean finish,
+    public WizardPage(@NotNull Pane root, @Nullable Supplier<String> nextFunction, boolean finish,
                       @NotNull Supplier<T> resultFunction, @NotNull ObservableValue<? extends Boolean> valid) {
         Objects.requireNonNull(root);
-        Objects.requireNonNull(nextFunction);
+        if (!finish) {
+            Objects.requireNonNull(nextFunction,
+                    "A non-last page is required to define function which calculates the next page.");
+        }
         Objects.requireNonNull(resultFunction);
         Objects.requireNonNull(valid);
 
@@ -79,11 +84,12 @@ public final class WizardPage<T> {
      * Creates a new page with given params. The {@code valid} property always contains {@code true}.
      *
      * @param root           The root pane containing all controls.
-     * @param nextFunction   The function calculating the name of the next page.
+     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
+     *                       {@code true} this value is allowed to be {@code null}.
      * @param finish         {@code true} only if this page is a last one.
      * @param resultFunction The function calculating the result this page represents.
      */
-    public WizardPage(@NotNull Pane root, @NotNull Supplier<String> nextFunction, boolean finish,
+    public WizardPage(@NotNull Pane root, @Nullable Supplier<String> nextFunction, boolean finish,
                       @NotNull Supplier<T> resultFunction) {
         this(root, nextFunction, finish, resultFunction, new SimpleBooleanProperty(true));
     }
