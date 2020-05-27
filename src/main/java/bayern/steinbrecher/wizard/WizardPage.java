@@ -62,22 +62,14 @@ public final class WizardPage<T> {
      */
     public WizardPage(@NotNull Pane root, @Nullable Supplier<String> nextFunction, boolean finish,
                       @NotNull Supplier<T> resultFunction, @NotNull ObservableValue<? extends Boolean> valid) {
-        Objects.requireNonNull(root);
-        if (!finish) {
-            Objects.requireNonNull(nextFunction,
-                    "A non-last page is required to define function which calculates the next page.");
-        }
-        Objects.requireNonNull(resultFunction);
-        Objects.requireNonNull(valid);
-
-        this.root = root;
+        this.root = Objects.requireNonNull(root);
         this.nextFunction.addListener((obs, oldVal, newVal) -> {
             hasNextFunction.set(newVal != null);
         });
-        this.nextFunction.setValue(nextFunction);
-        this.finish = finish;
+        setNextFunction(nextFunction);
+        setFinish(finish);
         this.resultFunction = Objects.requireNonNull(resultFunction, "The resultFunction must not be zero.");
-        this.valid.bind(valid);
+        setValidBinding(valid);
     }
 
     /**
@@ -119,7 +111,7 @@ public final class WizardPage<T> {
      *
      * @return The function calculating the key of the next page. Returns {@code null} if this page has no next one.
      */
-    @NotNull
+    @Nullable
     public Supplier<String> getNextFunction() {
         return nextFunctionProperty().getValue();
     }
@@ -127,10 +119,14 @@ public final class WizardPage<T> {
     /**
      * Sets a new function calculating the key of the next page.
      *
-     * @param nextFunction The function calculating the key of the next page.
+     * @param nextFunction The function calculating the key of the next page. Only in case this page is a last one
+     *                     {@code null} is allowed.
      */
-    public void setNextFunction(@NotNull Supplier<String> nextFunction) {
-        Objects.requireNonNull(nextFunction);
+    public void setNextFunction(@Nullable Supplier<String> nextFunction) {
+        if (!isFinish()) {
+            Objects.requireNonNull(nextFunction,
+                    "A non-last page is required to define function which calculates the next page.");
+        }
         this.nextFunction.setValue(nextFunction);
     }
 
@@ -168,7 +164,7 @@ public final class WizardPage<T> {
      * @param validBinding A new binding to bind this pages {@link #valid} property to.
      */
     public void setValidBinding(@NotNull ObservableValue<? extends Boolean> validBinding) {
-        this.valid.bind(validBinding);
+        this.valid.bind(Objects.requireNonNull(validBinding));
     }
 
     /**
