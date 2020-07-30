@@ -13,7 +13,7 @@
         Comes with a predefined collection of typical wizard pages.
     </description>
     <inceptionYear>2020</inceptionYear>
-    <url>https://github.com/TrackerSB/GenericWizard</url>
+    <url>https://www.steinbrecher.bayern/projects/mavenPackages.html#genericWizard</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
