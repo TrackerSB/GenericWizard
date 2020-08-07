@@ -48,7 +48,7 @@ public abstract class WizardableView<T extends Optional<?>, C extends Wizardable
     /**
      * @since 1.13
      */
-    public WizardableView(@NotNull String fxmlPath, @Nullable ResourceBundle bundle) {
+    protected WizardableView(@NotNull String fxmlPath, @Nullable ResourceBundle bundle) {
         Objects.requireNonNull(fxmlPath);
         this.fxmlPath = fxmlPath;
         this.bundle = bundle;
