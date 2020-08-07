@@ -24,7 +24,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="Wizard" target="13" />
+      <module name="Wizard" target="14" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
