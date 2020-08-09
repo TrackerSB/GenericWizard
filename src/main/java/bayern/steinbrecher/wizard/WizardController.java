@@ -47,6 +47,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Consumer;
@@ -251,11 +253,23 @@ public final class WizardController {
      * @param key  The key the page is associated with.
      * @param page The page to add to the wizard.
      */
-    public void put(@NotNull String key, @NotNull WizardPage<?> page) {
+    public void putPage(@NotNull String key, @NotNull WizardPage<?> page) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(page);
         if (history.contains(key)) {
             throw new IllegalStateException("A page already visited can not be replaced");
         }
         visitablePages.put(key, page);
+    }
+
+    @NotNull
+    public WizardPage<?> getPage(@NotNull String key) {
+        Objects.requireNonNull(key);
+        if (visitablePages.containsKey(key)) {
+            return visitablePages.get(key);
+        } else {
+            throw new NoSuchElementException("Could not find wizard page with id \"" + key + "\"");
+        }
     }
 
     @NotNull

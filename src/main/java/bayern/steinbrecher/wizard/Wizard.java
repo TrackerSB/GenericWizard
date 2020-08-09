@@ -79,10 +79,13 @@ public class Wizard {
      * @param key  The key the page is associated with.
      * @param page The page to add to the wizard.
      */
-    public void put(@NotNull String key, @NotNull WizardPage<?> page) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(page);
-        controller.put(key, page);
+    public void putPage(@NotNull String key, @NotNull WizardPage<?> page) {
+        controller.putPage(key, page);
+    }
+
+    @NotNull
+    public WizardPage<?> getPage(@NotNull String key) {
+        return controller.getPage(key);
     }
 
     @NotNull
