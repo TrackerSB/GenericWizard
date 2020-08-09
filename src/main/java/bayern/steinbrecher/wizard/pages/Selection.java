@@ -40,8 +40,7 @@ public class Selection<T extends Comparable<? extends T>>
      */
     public Selection(@NotNull Set<T> options) {
         super("Selection.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.pages.Selection"));
-        Objects.requireNonNull(options);
-        this.options = options;
+        this.options = Objects.requireNonNull(options);
     }
 
     @Override
