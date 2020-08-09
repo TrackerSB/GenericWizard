@@ -49,8 +49,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
      * @since 1.13
      */
     protected WizardPage(@NotNull String fxmlPath, @Nullable ResourceBundle bundle) {
-        Objects.requireNonNull(fxmlPath);
-        this.fxmlPath = fxmlPath;
+        this.fxmlPath = Objects.requireNonNull(fxmlPath);
         this.bundle = bundle;
     }
 
