@@ -16,7 +16,7 @@
  */
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardableController;
+import bayern.steinbrecher.wizard.WizardPageController;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -53,7 +53,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Stefan Huber
  * @since 1.4
  */
-public class SelectionController<T extends Comparable<? extends T>> extends WizardableController<Optional<Set<T>>> {
+public class SelectionController<T extends Comparable<? extends T>> extends WizardPageController<Optional<Set<T>>> {
 
     private final MapProperty<T, Optional<CheckBox>> optionsProperty
             = new SimpleMapProperty<>(FXCollections.observableHashMap());

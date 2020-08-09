@@ -16,184 +16,89 @@
  */
 package bayern.steinbrecher.wizard;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.LoadException;
+import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-import java.util.function.Supplier;
-
 /**
- * Represents a page of the wizard.
+ * Represents a class which can be in a {@link Wizard}.
  *
- * @param <T> The return type of the result represented by the page.
+ * @param <T> The type of the result of the {@link EmbeddedWizardPage}.
+ * @param <C> The type of the controller used by the {@link WizardPage}.
  * @author Stefan Huber
- * @since 1.0
+ * @since 1.2
  */
-public final class WizardPage<T> {
+public abstract class WizardPage<T extends Optional<?>, C extends WizardPageController<T>> {
+
+    private final String fxmlPath;
+    private final ResourceBundle bundle;
+    private C controller;
 
     /**
-     * The key of the page to be used as first one.
+     * @since 1.13
      */
-    public static final String FIRST_PAGE_KEY = "first";
-    private final ReadOnlyBooleanWrapper valid = new ReadOnlyBooleanWrapper(this, "valid");
-    private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
-    private final Pane root;
-    private final Property<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
-    private boolean finish;
-    private final Supplier<T> resultFunction;
-
-    /**
-     * Creates a new page with given params.
-     *
-     * @param root           The root pane containing all controls.
-     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
-     *                       {@code true} this value is allowed to be {@code null}.
-     * @param finish         {@code true} only if this page is a last one.
-     * @param resultFunction The function calculating the result this page represents.
-     * @param valid          A binding to bind this pages {@code valid} property to.
-     */
-    public WizardPage(@NotNull Pane root, @Nullable Supplier<String> nextFunction, boolean finish,
-                      @NotNull Supplier<T> resultFunction, @NotNull ObservableValue<? extends Boolean> valid) {
-        this.root = Objects.requireNonNull(root);
-        this.nextFunction.addListener((obs, oldVal, newVal) -> {
-            hasNextFunction.set(newVal != null);
-        });
-        makeFinishPage(finish, nextFunction);
-        this.resultFunction = Objects.requireNonNull(resultFunction, "The resultFunction must not be zero.");
-        setValidBinding(valid);
+    protected WizardPage(@NotNull String fxmlPath, @Nullable ResourceBundle bundle) {
+        Objects.requireNonNull(fxmlPath);
+        this.fxmlPath = fxmlPath;
+        this.bundle = bundle;
     }
 
-    /**
-     * Creates a new page with given params. The {@code valid} property always contains {@code true}.
-     *
-     * @param root           The root pane containing all controls.
-     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
-     *                       {@code true} this value is allowed to be {@code null}.
-     * @param finish         {@code true} only if this page is a last one.
-     * @param resultFunction The function calculating the result this page represents.
-     */
-    public WizardPage(@NotNull Pane root, @Nullable Supplier<String> nextFunction, boolean finish,
-                      @NotNull Supplier<T> resultFunction) {
-        this(root, nextFunction, finish, resultFunction, new SimpleBooleanProperty(true));
-    }
-
-    /**
-     * Returns the pane containing all controls.
-     *
-     * @return The pane containing all controls.
-     */
-    @NotNull
-    public Pane getRoot() {
-        return root;
-    }
-
-    /**
-     * The property containing the function calculating which page to show next.
-     *
-     * @return The property containing the function calculating which page to show next.
-     */
-    @NotNull
-    public ReadOnlyProperty<Supplier<String>> nextFunctionProperty() {
-        return nextFunction;
-    }
-
-    /**
-     * Returns the function calculating the key of the next page.
-     *
-     * @return The function calculating the key of the next page. Returns {@code null} if this page has no next one.
-     */
-    @Nullable
-    public Supplier<String> getNextFunction() {
-        return nextFunctionProperty().getValue();
-    }
-
-    /**
-     * Returns whether this page is a last one.
-     *
-     * @return {@code true} only if this page is a last one.
-     */
-    public boolean isFinish() {
-        return finish;
-    }
-
-    /*
-     * @param finish         {@code true} only if this page is a last one.
-     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
-     *                       {@code true} this value is allowed to be {@code null}.
-     */
-    public void makeFinishPage(boolean finish, @Nullable Supplier<String> nextFunction) {
-        if (!finish) {
-            Objects.requireNonNull(nextFunction,
-                    "A non-last page must define a function which calculates the next page.");
+    private <P extends Parent> P loadFXML() throws LoadException {
+        URL resource = getClass().getResource(fxmlPath);
+        if (resource == null) {
+            throw new LoadException(
+                    new FileNotFoundException(
+                            String.format("The class %s can not find the resource %s", getClass().getName(), fxmlPath)
+                    )
+            );
+        } else {
+            FXMLLoader fxmlLoader = new FXMLLoader(resource, bundle);
+            P root;
+            try {
+                root = fxmlLoader.load();
+            } catch (IOException ex) {
+                throw new LoadException(ex);
+            }
+            controller = fxmlLoader.getController();
+            afterControllerInitialized();
+            return root;
         }
-        this.finish = finish;
-        this.nextFunction.setValue(nextFunction);
     }
 
     /**
-     * Returns the function calculating the result this page represents.
+     * This method is executed after the FXML is loaded and right after the corresponding controller is set. This
+     * function represents an equivalent to a FXML controllers initialize method.
      *
-     * @return The function calculating the result this page represents.
+     * @since 1.8
+     */
+    protected abstract void afterControllerInitialized();
+
+    /**
+     * Creates a {@link EmbeddedWizardPage}. The nextFunction returns always {@code null} and isFinish is set to {@code false}.
+     *
+     * @return The newly created {@link EmbeddedWizardPage}. Returns {@code null} if the {@link EmbeddedWizardPage} could not be
+     * created.
      */
     @NotNull
-    public Supplier<T> getResultFunction() {
-        return resultFunction;
+    @Contract("-> new")
+    public EmbeddedWizardPage<T> getWizardPage() throws LoadException {
+        Pane root = loadFXML();
+        return new EmbeddedWizardPage<>(
+                root, null, false, () -> getController().getResult(), getController().validProperty());
     }
 
-    /**
-     * Sets a new binding to bind this pages {@link #valid} property to.
-     *
-     * @param validBinding A new binding to bind this pages {@link #valid} property to.
-     */
-    public void setValidBinding(@NotNull ObservableValue<? extends Boolean> validBinding) {
-        this.valid.bind(Objects.requireNonNull(validBinding));
-    }
-
-    /**
-     * Returns the property representing whether this page has valid input.
-     *
-     * @return The property representing whether this page has valid input.
-     */
-    @NotNull
-    public ReadOnlyBooleanProperty validProperty() {
-        return valid.getReadOnlyProperty();
-    }
-
-    /**
-     * Returns whether the current input of this page is valid.
-     *
-     * @return {@code true} only if the current input of this page is valid.
-     */
-    public boolean isValid() {
-        return validProperty().get();
-    }
-
-    /**
-     * Returns the property holding {@code true} only if this page has a {@code nextFunction}.
-     *
-     * @return The property holding {@code true} only if this page has a {@code nextFunction}.
-     * @see #nextFunctionProperty()
-     */
-    @NotNull
-    public ReadOnlyBooleanProperty hasNextFunctionProperty() {
-        return hasNextFunction.getReadOnlyProperty();
-    }
-
-    /**
-     * Checks whether this page has a {@code nextFunction}.
-     *
-     * @return Returns {@code true} only if this page has a {@code nextFunction}.
-     * @see #nextFunctionProperty()
-     */
-    public boolean isHasNextFunction() {
-        return hasNextFunctionProperty().get();
+    public C getController() {
+        return controller;
     }
 }

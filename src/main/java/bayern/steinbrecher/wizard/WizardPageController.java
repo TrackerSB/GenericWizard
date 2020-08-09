@@ -31,13 +31,13 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
- * Represents a controller of a {@link WizardableView}.
+ * Represents a controller of a {@link WizardPage}.
  *
  * @param <T> The type of the result represented by this controller.
  * @author Stefan Huber
  * @since 1.2
  */
-public abstract class WizardableController<T extends Optional<?>> {
+public abstract class WizardPageController<T extends Optional<?>> {
 
     /**
      * A property indicating whether all input handled by this controller is valid.

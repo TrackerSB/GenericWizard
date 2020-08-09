@@ -57,7 +57,7 @@ public class Wizard {
 
     @Contract("_ -> new")
     @NotNull
-    public static Wizard create(@NotNull Map<String, WizardPage<?>> pages) {
+    public static Wizard create(@NotNull Map<String, EmbeddedWizardPage<?>> pages) {
         Objects.requireNonNull(pages);
         FXMLLoader fxmlLoader = new FXMLLoader(Wizard.class.getResource("Wizard.fxml"),
                 ResourceBundle.getBundle("bayern.steinbrecher.wizard.Wizard"));
@@ -79,12 +79,12 @@ public class Wizard {
      * @param key  The key the page is associated with.
      * @param page The page to add to the wizard.
      */
-    public void putPage(@NotNull String key, @NotNull WizardPage<?> page) {
+    public void putPage(@NotNull String key, @NotNull EmbeddedWizardPage<?> page) {
         controller.putPage(key, page);
     }
 
     @NotNull
-    public WizardPage<?> getPage(@NotNull String key) {
+    public EmbeddedWizardPage<?> getPage(@NotNull String key) {
         return controller.getPage(key);
     }
 
@@ -140,12 +140,12 @@ public class Wizard {
     }
 
     @NotNull
-    public ReadOnlyProperty<WizardPage<?>> currentPageProperty() {
+    public ReadOnlyProperty<EmbeddedWizardPage<?>> currentPageProperty() {
         return controller.currentPageProperty();
     }
 
     @NotNull
-    public WizardPage<?> getCurrentPage() {
+    public EmbeddedWizardPage<?> getCurrentPage() {
         return currentPageProperty().getValue();
     }
 }

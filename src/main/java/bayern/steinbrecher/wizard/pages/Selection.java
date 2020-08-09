@@ -16,7 +16,7 @@
  */
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardableView;
+import bayern.steinbrecher.wizard.WizardPage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -30,7 +30,7 @@ import java.util.Set;
  * @since 1.4
  */
 public class Selection<T extends Comparable<? extends T>>
-        extends WizardableView<Optional<Set<T>>, SelectionController<T>> {
+        extends WizardPage<Optional<Set<T>>, SelectionController<T>> {
 
     private final Set<T> options;
 

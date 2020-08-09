@@ -71,9 +71,9 @@ public final class WizardController {
     /* FIXME The initial dummy page is needed since the current page may be already requested before there is a chance
      * to specify the pages of the wizard.
      */
-    private final ReadOnlyObjectWrapper<WizardPage<?>> currentPage = new ReadOnlyObjectWrapper<>(
-            this, "currentPage", new WizardPage<Void>(new Pane(), () -> null, false, () -> null));
-    private final MapProperty<String, WizardPage<?>> visitablePages = new SimpleMapProperty<>();
+    private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage = new ReadOnlyObjectWrapper<>(
+            this, "currentPage", new EmbeddedWizardPage<Void>(new Pane(), () -> null, false, () -> null));
+    private final MapProperty<String, EmbeddedWizardPage<?>> visitablePages = new SimpleMapProperty<>();
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
     private final ReadOnlyObjectWrapper<WizardState> state
@@ -92,13 +92,13 @@ public final class WizardController {
     private void initialize() {
         visitablePages.addListener((obs, oldVal, newVal) -> {
             newVal.values().stream()
-                    .map(WizardPage::getRoot)
+                    .map(EmbeddedWizardPage::getRoot)
                     .forEach(pane -> {
                         HBox.setHgrow(pane, Priority.ALWAYS);
                         VBox.setVgrow(pane, Priority.ALWAYS);
                     });
             currentIndex.addListener((obsI, oldValI, newValI) -> {
-                WizardPage<?> newPage = visitablePages.get(newValI);
+                EmbeddedWizardPage<?> newPage = visitablePages.get(newValI);
                 atFinish.set(newPage.isFinish());
                 currentPage.setValue(newPage);
             });
@@ -123,7 +123,7 @@ public final class WizardController {
     @SuppressWarnings("unused")
     private void showNext() {
         if (getCurrentPage().isValid() && !isChangingPage()) {
-            WizardPage<?> page = getCurrentPage();
+            EmbeddedWizardPage<?> page = getCurrentPage();
             Supplier<String> nextFunction = page.getNextFunction();
             if (page.isHasNextFunction() && page.isValid()) {
                 String nextIndex = nextFunction.get();
@@ -156,12 +156,12 @@ public final class WizardController {
     }
 
     @NotNull
-    public MapProperty<String, WizardPage<?>> visitablePagesProperty() {
+    public MapProperty<String, EmbeddedWizardPage<?>> visitablePagesProperty() {
         return visitablePages;
     }
 
     @NotNull
-    public Map<String, WizardPage<?>> getVisitablePages() {
+    public Map<String, EmbeddedWizardPage<?>> getVisitablePages() {
         return visitablePages.get();
     }
 
@@ -232,16 +232,16 @@ public final class WizardController {
      *
      * @param visitablePages The map of pages to set.
      */
-    public void setVisitablePages(@NotNull Map<String, WizardPage<?>> visitablePages) {
-        if (!visitablePages.containsKey(WizardPage.FIRST_PAGE_KEY)) {
+    public void setVisitablePages(@NotNull Map<String, EmbeddedWizardPage<?>> visitablePages) {
+        if (!visitablePages.containsKey(EmbeddedWizardPage.FIRST_PAGE_KEY)) {
             throw new IllegalArgumentException("Map of pages must have a key WizardPage.FIRST_PAGE_KEY");
         }
 
-        currentIndex.set(WizardPage.FIRST_PAGE_KEY);
+        currentIndex.set(EmbeddedWizardPage.FIRST_PAGE_KEY);
         this.visitablePages.set(FXCollections.observableMap(visitablePages));
-        currentPage.setValue(visitablePages.get(WizardPage.FIRST_PAGE_KEY));
+        currentPage.setValue(visitablePages.get(EmbeddedWizardPage.FIRST_PAGE_KEY));
         history.clear();
-        history.push(WizardPage.FIRST_PAGE_KEY);
+        history.push(EmbeddedWizardPage.FIRST_PAGE_KEY);
         updatePage(null);
     }
 
@@ -253,7 +253,7 @@ public final class WizardController {
      * @param key  The key the page is associated with.
      * @param page The page to add to the wizard.
      */
-    public void putPage(@NotNull String key, @NotNull WizardPage<?> page) {
+    public void putPage(@NotNull String key, @NotNull EmbeddedWizardPage<?> page) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(page);
         if (history.contains(key)) {
@@ -263,7 +263,7 @@ public final class WizardController {
     }
 
     @NotNull
-    public WizardPage<?> getPage(@NotNull String key) {
+    public EmbeddedWizardPage<?> getPage(@NotNull String key) {
         Objects.requireNonNull(key);
         if (visitablePages.containsKey(key)) {
             return visitablePages.get(key);
@@ -301,12 +301,12 @@ public final class WizardController {
     }
 
     @NotNull
-    public ReadOnlyObjectProperty<WizardPage<?>> currentPageProperty() {
+    public ReadOnlyObjectProperty<EmbeddedWizardPage<?>> currentPageProperty() {
         return currentPage.getReadOnlyProperty();
     }
 
     @NotNull
-    public WizardPage<?> getCurrentPage() {
+    public EmbeddedWizardPage<?> getCurrentPage() {
         return currentPageProperty().getValue();
     }
 
