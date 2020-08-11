@@ -93,9 +93,6 @@ public final class WizardController {
         currentPage.set(
                 new EmbeddedWizardPage<Optional<Void>>(
                         new WizardPage<>("nonExistent", null) {
-                            @Override
-                            protected void afterControllerInitialized() {
-                            }
                         }, () -> null, false
                 )
         );

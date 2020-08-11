@@ -81,7 +81,9 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
      *
      * @since 1.8
      */
-    protected abstract void afterControllerInitialized();
+    protected void afterControllerInitialized() {
+        // No op
+    }
 
     /**
      * Creates a {@link EmbeddedWizardPage}. The nextFunction returns always {@code null} and isFinish is set to
