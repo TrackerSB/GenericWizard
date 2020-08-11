@@ -84,11 +84,6 @@ public class Wizard {
     }
 
     @NotNull
-    public EmbeddedWizardPage<?> getPage(@NotNull String key) {
-        return controller.getPage(key);
-    }
-
-    @NotNull
     public Parent getRoot() {
         return root;
     }

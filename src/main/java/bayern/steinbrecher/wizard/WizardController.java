@@ -274,16 +274,6 @@ public final class WizardController {
     }
 
     @NotNull
-    public EmbeddedWizardPage<?> getPage(@NotNull String key) {
-        Objects.requireNonNull(key);
-        if (visitablePages.containsKey(key)) {
-            return visitablePages.get(key);
-        } else {
-            throw new NoSuchElementException("Could not find wizard page with id \"" + key + "\"");
-        }
-    }
-
-    @NotNull
     public ReadOnlyBooleanProperty atBeginningProperty() {
         return atBeginning.getReadOnlyProperty();
     }
