@@ -20,14 +20,14 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.fxml.LoadException;
 import javafx.scene.layout.Pane;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -37,52 +37,24 @@ import java.util.function.Supplier;
  * @author Stefan Huber
  * @since 1.0
  */
-public final class EmbeddedWizardPage<T> {
+public final class EmbeddedWizardPage<T extends Optional<?>> {
 
     /**
      * The key of the page to be used as first one.
      */
     public static final String FIRST_PAGE_KEY = "first";
-    private final ReadOnlyBooleanWrapper valid = new ReadOnlyBooleanWrapper(this, "valid");
-    private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
+    private final WizardPage<T, ?> page;
     private final Pane root;
+    private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
     private final Property<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
     private boolean finish;
-    private final Supplier<T> resultFunction;
 
-    /**
-     * Creates a new page with given params.
-     *
-     * @param root           The root pane containing all controls.
-     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
-     *                       {@code true} this value is allowed to be {@code null}.
-     * @param finish         {@code true} only if this page is a last one.
-     * @param resultFunction The function calculating the result this page represents.
-     * @param valid          A binding to bind this pages {@code valid} property to.
-     */
-    public EmbeddedWizardPage(@NotNull Pane root, @Nullable Supplier<String> nextFunction, boolean finish,
-                              @NotNull Supplier<T> resultFunction, @NotNull ObservableValue<? extends Boolean> valid) {
-        this.root = Objects.requireNonNull(root);
-        this.nextFunction.addListener((obs, oldVal, newVal) -> {
-            hasNextFunction.set(newVal != null);
-        });
+    public EmbeddedWizardPage(@NotNull WizardPage<T, ?> page, @Nullable Supplier<String> nextFunction, boolean finish)
+            throws LoadException {
+        this.page = Objects.requireNonNull(page);
+        this.root = page.loadFXML();
+        this.nextFunction.addListener((obs, oldVal, newVal) -> hasNextFunction.set(newVal != null));
         makeFinishPage(finish, nextFunction);
-        this.resultFunction = Objects.requireNonNull(resultFunction, "The resultFunction must not be zero.");
-        setValidBinding(valid);
-    }
-
-    /**
-     * Creates a new page with given params. The {@code valid} property always contains {@code true}.
-     *
-     * @param root           The root pane containing all controls.
-     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
-     *                       {@code true} this value is allowed to be {@code null}.
-     * @param finish         {@code true} only if this page is a last one.
-     * @param resultFunction The function calculating the result this page represents.
-     */
-    public EmbeddedWizardPage(@NotNull Pane root, @Nullable Supplier<String> nextFunction, boolean finish,
-                              @NotNull Supplier<T> resultFunction) {
-        this(root, nextFunction, finish, resultFunction, new SimpleBooleanProperty(true));
     }
 
     /**
@@ -138,23 +110,8 @@ public final class EmbeddedWizardPage<T> {
         this.nextFunction.setValue(nextFunction);
     }
 
-    /**
-     * Returns the function calculating the result this page represents.
-     *
-     * @return The function calculating the result this page represents.
-     */
-    @NotNull
-    public Supplier<T> getResultFunction() {
-        return resultFunction;
-    }
-
-    /**
-     * Sets a new binding to bind this pages {@link #valid} property to.
-     *
-     * @param validBinding A new binding to bind this pages {@link #valid} property to.
-     */
-    public void setValidBinding(@NotNull ObservableValue<? extends Boolean> validBinding) {
-        this.valid.bind(Objects.requireNonNull(validBinding));
+    public T getResult() {
+        return page.getResult();
     }
 
     /**
@@ -164,7 +121,7 @@ public final class EmbeddedWizardPage<T> {
      */
     @NotNull
     public ReadOnlyBooleanProperty validProperty() {
-        return valid.getReadOnlyProperty();
+        return page.validProperty();
     }
 
     /**

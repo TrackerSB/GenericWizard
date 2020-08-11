@@ -16,20 +16,20 @@
  */
 package bayern.steinbrecher.wizard;
 
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.LoadException;
+import javafx.scene.layout.Pane;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
-
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.LoadException;
-import javafx.scene.Parent;
-import javafx.scene.layout.Pane;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a class which can be in a {@link Wizard}.
@@ -53,7 +53,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
         this.bundle = bundle;
     }
 
-    private <P extends Parent> P loadFXML() throws LoadException {
+    Pane loadFXML() throws LoadException {
         URL resource = getClass().getResource(fxmlPath);
         if (resource == null) {
             throw new LoadException(
@@ -63,7 +63,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
             );
         } else {
             FXMLLoader fxmlLoader = new FXMLLoader(resource, bundle);
-            P root;
+            Pane root;
             try {
                 root = fxmlLoader.load();
             } catch (IOException ex) {
@@ -84,19 +84,33 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     protected abstract void afterControllerInitialized();
 
     /**
-     * Creates a {@link EmbeddedWizardPage}. The nextFunction returns always {@code null} and isFinish is set to {@code false}.
+     * Creates a {@link EmbeddedWizardPage}. The nextFunction returns always {@code null} and isFinish is set to
+     * {@code false}.
      *
-     * @return The newly created {@link EmbeddedWizardPage}. Returns {@code null} if the {@link EmbeddedWizardPage} could not be
-     * created.
+     * @return The newly created {@link EmbeddedWizardPage}.
      */
     @NotNull
     @Contract("-> new")
-    public EmbeddedWizardPage<T> getWizardPage() throws LoadException {
-        Pane root = loadFXML();
-        return new EmbeddedWizardPage<>(
-                root, null, false, () -> getController().getResult(), getController().validProperty());
+    public EmbeddedWizardPage<T> generateEmbeddableWizardPage() throws LoadException {
+        return new EmbeddedWizardPage<>(this, null, false);
     }
 
+    public T getResult() {
+        return getController()
+                .getResult();
+    }
+
+    public ReadOnlyBooleanProperty validProperty() {
+        return getController()
+                .validProperty();
+    }
+
+    public boolean isValid() {
+        return validProperty()
+                .get();
+    }
+
+    // FIXME Should it be public? Could protected be enough?
     public C getController() {
         return controller;
     }

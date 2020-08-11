@@ -29,6 +29,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.LoadException;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -72,7 +73,7 @@ public final class WizardController {
      * to specify the pages of the wizard.
      */
     private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage = new ReadOnlyObjectWrapper<>(
-            this, "currentPage", new EmbeddedWizardPage<Void>(new Pane(), () -> null, false, () -> null));
+            this, "currentPage", null);
     private final MapProperty<String, EmbeddedWizardPage<?>> visitablePages = new SimpleMapProperty<>();
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
@@ -86,6 +87,19 @@ public final class WizardController {
     private StackPane contents;
     private static final String WIZARD_CONTENT_STYLECLASS = "wizard-content";
     private static final Duration SWIPE_DURATION = Duration.seconds(0.75);
+
+    public WizardController() throws LoadException {
+        // Make sure to not access null
+        currentPage.set(
+                new EmbeddedWizardPage<Optional<Void>>(
+                        new WizardPage<>("nonExistent", null) {
+                            @Override
+                            protected void afterControllerInitialized() {
+                            }
+                        }, () -> null, false
+                )
+        );
+    }
 
     @FXML
     @SuppressWarnings("unused")
