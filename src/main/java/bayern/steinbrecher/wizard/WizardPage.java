@@ -112,8 +112,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
                 .get();
     }
 
-    // FIXME Should it be public? Could protected be enough?
-    public C getController() {
+    protected C getController() {
         return controller;
     }
 }
