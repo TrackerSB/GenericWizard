@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
  * @author Stefan Huber
  * @since 1.23
  */
-abstract class StandaloneWizardPageController<T extends Optional<?>> extends WizardPageController<T> {
+public abstract class StandaloneWizardPageController<T extends Optional<?>> extends WizardPageController<T> {
     @FXML
     private ResourceBundle resources;
     private final ObjectProperty<Stage> stage = new SimpleObjectProperty<>(this, "stage", null);
