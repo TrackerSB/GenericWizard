@@ -93,7 +93,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
      */
     @NotNull
     @Contract("-> new")
-    public EmbeddedWizardPage<T> generateEmbeddableWizardPage() throws LoadException {
+    public final EmbeddedWizardPage<T> generateEmbeddableWizardPage() throws LoadException {
         return new EmbeddedWizardPage<>(this, null, false);
     }
 

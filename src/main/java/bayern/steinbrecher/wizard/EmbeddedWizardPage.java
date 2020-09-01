@@ -49,7 +49,7 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     private final Property<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
     private boolean finish;
 
-    public EmbeddedWizardPage(@NotNull WizardPage<T, ?> page, @Nullable Supplier<String> nextFunction, boolean finish)
+    EmbeddedWizardPage(@NotNull WizardPage<T, ?> page, @Nullable Supplier<String> nextFunction, boolean finish)
             throws LoadException {
         this.page = Objects.requireNonNull(page);
         this.root = page.loadFXML();
