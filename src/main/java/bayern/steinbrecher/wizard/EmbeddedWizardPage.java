@@ -26,9 +26,15 @@ import javafx.scene.layout.Pane;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a page of the wizard.
@@ -39,6 +45,7 @@ import java.util.function.Supplier;
  */
 public final class EmbeddedWizardPage<T extends Optional<?>> {
 
+    private static final Logger LOGGER = Logger.getLogger(EmbeddedWizardPage.class.getName());
     /**
      * The key of the page to be used as first one.
      */
@@ -48,13 +55,14 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
     private final Property<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
     private boolean finish;
+    private Wizard containingWizard = null;
 
     EmbeddedWizardPage(@NotNull WizardPage<T, ?> page, @Nullable Supplier<String> nextFunction, boolean finish)
             throws LoadException {
         this.page = Objects.requireNonNull(page);
         this.root = page.loadFXML();
         this.nextFunction.addListener((obs, oldVal, newVal) -> hasNextFunction.set(newVal != null));
-        makeFinishPage(finish, nextFunction);
+        setFinishAndNext(finish, nextFunction);
     }
 
     /**
@@ -100,14 +108,76 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
      * @param finish         {@code true} only if this page is a last one.
      * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
      *                       {@code true} this value is allowed to be {@code null}.
+     * @since 1.27
      */
-    public void makeFinishPage(boolean finish, @Nullable Supplier<String> nextFunction) {
+    public void setFinishAndNext(boolean finish, @Nullable Supplier<String> nextFunction) {
         if (!finish) {
             Objects.requireNonNull(nextFunction,
                     "A non-last page must define a function which calculates the next page.");
         }
         this.finish = finish;
         this.nextFunction.setValue(nextFunction);
+    }
+
+    /**
+     * This method must be called by a {@link Wizard} if it registers this page as one of its visitable pages.
+     * NOTE Currently (2020-09-01) the reference to the containing wizard is solely needed in case this pages next
+     * function dynamically creates a {@link WizardPage}.
+     */
+    void setContainingWizard(@NotNull Wizard wizard) {
+        if (containingWizard != null) {
+            throw new IllegalStateException("This page is already registered to a wizard");
+        }
+        containingWizard = Objects.requireNonNull(wizard);
+    }
+
+    /**
+     * @return A {@link Future} object which contains the dynamically generated next page as soon as the {@link Wizard}
+     * this page belongs to tries to access its next page.
+     * @see #setFinishAndNext(boolean, Supplier)
+     * @since 1.27
+     */
+    public <R extends Optional<?>, C extends WizardPageController<R>> Future<WizardPage<R, C>> setFinishAndDynamicNext(
+            boolean finish, @Nullable Supplier<WizardPage<R, C>> dynamicNextFunction, @NotNull String pageID) {
+        CompletableFuture<WizardPage<R, C>> wizardPageCreation = new CompletableFuture<>();
+        Supplier<String> nextFunction;
+        if (dynamicNextFunction == null) {
+            nextFunction = null;
+            wizardPageCreation.completeExceptionally(
+                    new NoSuchElementException(
+                            "This wizard page has no next function which could have dynamically created the next "
+                                    + "wizard page."));
+        } else {
+            nextFunction = () -> {
+                if (containingWizard == null) {
+                    wizardPageCreation.completeExceptionally(
+                            new IllegalStateException(
+                                    "This pages next function can not register a dynamically created next page since "
+                                            + "no wizard registered for containing this page"));
+                } else {
+                    WizardPage<R, C> wizardPage = dynamicNextFunction.get();
+                    try {
+                        containingWizard.putPage(pageID, wizardPage.generateEmbeddableWizardPage());
+                        wizardPageCreation.complete(wizardPage);
+                    } catch (LoadException ex) {
+                        wizardPageCreation.completeExceptionally(ex);
+                    }
+                }
+                if (wizardPageCreation.isCompletedExceptionally()) {
+                    Throwable creationException;
+                    try {
+                        creationException = wizardPageCreation.handle((noResult, ex) -> ex)
+                                .get();
+                    } catch (InterruptedException | ExecutionException ex) {
+                        creationException = ex;
+                    }
+                    LOGGER.log(Level.SEVERE, "The dynamic creation of a wizard page failed", creationException);
+                }
+                return pageID;
+            };
+        }
+        setFinishAndNext(finish, nextFunction);
+        return wizardPageCreation;
     }
 
     public T getResult() {

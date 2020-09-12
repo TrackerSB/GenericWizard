@@ -69,7 +69,10 @@ public class Wizard {
         }
         WizardController controller = fxmlLoader.getController();
         controller.setVisitablePages(pages);
-        return new Wizard(controller, root);
+        Wizard wizard = new Wizard(controller, root);
+        pages.values()
+                .forEach(p -> p.setContainingWizard(wizard));
+        return wizard;
     }
 
     /**
@@ -81,6 +84,7 @@ public class Wizard {
      */
     public void putPage(@NotNull String key, @NotNull EmbeddedWizardPage<?> page) {
         controller.putPage(key, page);
+        page.setContainingWizard(this);
     }
 
     @NotNull
