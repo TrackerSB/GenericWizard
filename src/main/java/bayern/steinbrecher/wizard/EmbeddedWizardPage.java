@@ -31,7 +31,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -132,12 +131,12 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     }
 
     /**
-     * @return A {@link Future} object which contains the dynamically generated next page as soon as the {@link Wizard}
+     * @return A {@link CompletableFuture} object which contains the dynamically generated next page as soon as the {@link Wizard}
      * this page belongs to tries to access its next page.
      * @see #setFinishAndNext(boolean, Supplier)
      * @since 1.27
      */
-    public <R extends Optional<?>, C extends WizardPageController<R>> Future<EmbeddedWizardPage<R>> setFinishAndDynamicNext(
+    public <R extends Optional<?>, C extends WizardPageController<R>> CompletableFuture<EmbeddedWizardPage<R>> setFinishAndDynamicNext(
             boolean finish, @Nullable Supplier<WizardPage<R, C>> dynamicNextFunction, @NotNull String pageID) {
         CompletableFuture<EmbeddedWizardPage<R>> wizardPageCreation = new CompletableFuture<>();
         Supplier<String> nextFunction;
