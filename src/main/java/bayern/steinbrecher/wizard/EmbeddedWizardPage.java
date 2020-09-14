@@ -137,9 +137,9 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
      * @see #setFinishAndNext(boolean, Supplier)
      * @since 1.27
      */
-    public <R extends Optional<?>, C extends WizardPageController<R>> Future<WizardPage<R, C>> setFinishAndDynamicNext(
+    public <R extends Optional<?>, C extends WizardPageController<R>> Future<EmbeddedWizardPage<R>> setFinishAndDynamicNext(
             boolean finish, @Nullable Supplier<WizardPage<R, C>> dynamicNextFunction, @NotNull String pageID) {
-        CompletableFuture<WizardPage<R, C>> wizardPageCreation = new CompletableFuture<>();
+        CompletableFuture<EmbeddedWizardPage<R>> wizardPageCreation = new CompletableFuture<>();
         Supplier<String> nextFunction;
         if (dynamicNextFunction == null) {
             nextFunction = null;
@@ -155,9 +155,10 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
                                     "This pages next function can not register a dynamically created next page since "
                                             + "no wizard registered for containing this page"));
                 } else {
-                    WizardPage<R, C> wizardPage = dynamicNextFunction.get();
                     try {
-                        containingWizard.putPage(pageID, wizardPage.generateEmbeddableWizardPage());
+                        EmbeddedWizardPage<R> wizardPage = dynamicNextFunction.get()
+                                .generateEmbeddableWizardPage();
+                        containingWizard.putPage(pageID, wizardPage);
                         wizardPageCreation.complete(wizardPage);
                     } catch (LoadException ex) {
                         wizardPageCreation.completeExceptionally(ex);
