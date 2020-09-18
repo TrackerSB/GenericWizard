@@ -87,14 +87,14 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
 
     /**
      * Creates a {@link EmbeddedWizardPage}. The nextFunction returns always {@code null} and isFinish is set to
-     * {@code false}.
+     * {@code true}.
      *
      * @return The newly created {@link EmbeddedWizardPage}.
      */
     @NotNull
     @Contract("-> new")
     public final EmbeddedWizardPage<T> generateEmbeddableWizardPage() throws LoadException {
-        return new EmbeddedWizardPage<>(this, null, false);
+        return new EmbeddedWizardPage<>(this, null, true);
     }
 
     public T getResult() {
