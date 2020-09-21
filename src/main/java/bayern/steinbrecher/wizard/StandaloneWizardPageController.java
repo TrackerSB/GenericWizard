@@ -7,6 +7,7 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public abstract class StandaloneWizardPageController<T extends Optional<?>> exte
 
     @FXML
     private void initialize() {
-        setCloseText(resources.getString("close"));
+        setCloseText(null);
     }
 
     @NotNull
@@ -54,14 +55,15 @@ public abstract class StandaloneWizardPageController<T extends Optional<?>> exte
     /**
      * @since 1.26
      */
-    public void setCloseText(@NotNull String closeText) {
+    public void setCloseText(@Nullable String closeText) {
         closeTextProperty()
-                .set(Objects.requireNonNull(closeText));
+                .set(closeText == null ? resources.getString("close") : closeText);
     }
 
     /**
      * @since 1.26
      */
+    @NotNull
     public String getCloseText() {
         return closeTextProperty()
                 .get();
