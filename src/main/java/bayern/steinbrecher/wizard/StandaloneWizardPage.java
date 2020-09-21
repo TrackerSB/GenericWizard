@@ -32,7 +32,7 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
     /**
      * @since 1.26
      */
-    public Pane generateStandalonePage(@NotNull Stage stage, @NotNull String closeText) throws LoadException {
+    public Pane generateStandalonePage(@NotNull Stage stage, @Nullable String closeText) throws LoadException {
         FXMLLoader fxmlLoader;
         try {
             fxmlLoader = FXMLLoader.load(
