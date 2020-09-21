@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -47,23 +46,8 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
         standaloneController.setCloseText(closeText);
         standaloneController.setStage(
                 Objects.requireNonNull(stage, "For being used as a standalone window a stage is required"));
+        standaloneController.setContent(generateEmbeddableWizardPage().getRoot());
 
-        // Embed wizard page content
-        Pane standaloneRoot = fxmlLoader.getRoot();
-        standaloneRoot.getChildren()
-                .stream()
-                .filter(n -> n.getId().equals("contentHolder"))
-                .filter(n -> n instanceof Pane)
-                .map(n -> (Pane) n)
-                .findFirst()
-                .orElseThrow(() -> new Error(
-                        "Could not insert wizard page into standalone wrapper",
-                        new NoSuchElementException(
-                                "Could not find the element to hold the wizard page content "
-                                        + "(Either no element with the required name is found or no children can "
-                                        + "be added)")))
-                .getChildren()
-                .add(generateEmbeddableWizardPage().getRoot());
-        return standaloneRoot;
+        return fxmlLoader.getRoot();
     }
 }

@@ -5,28 +5,47 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 /**
  * @author Stefan Huber
  * @since 1.23
  */
-public abstract class StandaloneWizardPageController<T extends Optional<?>> extends WizardPageController<T> {
-    @FXML
-    private ResourceBundle resources;
+public class StandaloneWizardPageController<T extends Optional<?>> extends WizardPageController<T> {
     private final ObjectProperty<Stage> stage = new SimpleObjectProperty<>(this, "stage", null);
     private final StringProperty closeText
             = new SimpleStringProperty(this, "closeText", null);
+    @FXML
+    private Pane contentHolder;
 
     @FXML
     private void initialize() {
         setCloseText(null);
+    }
+
+    /**
+     * @since 1.35
+     */
+    void setContent(Node content){
+        contentHolder.getChildren()
+                .add(content);
+    }
+
+    /**
+     * @since 1.35
+     */
+    @Override
+    protected T calculateResult() {
+        /* NOTE To be able to use this class as a controller in a FXML file this class has to allow the creation of
+         * instances, i.e. it must not be abstract.
+         */
+        throw new UnsupportedOperationException("The default controller implementation does not yield any result");
     }
 
     @NotNull
@@ -57,7 +76,7 @@ public abstract class StandaloneWizardPageController<T extends Optional<?>> exte
      */
     public void setCloseText(@Nullable String closeText) {
         closeTextProperty()
-                .set(closeText == null ? resources.getString("close") : closeText);
+                .set(closeText == null ? getResourceValue("close") : closeText);
     }
 
     /**

@@ -73,7 +73,7 @@ public abstract class WizardPageController<T extends Optional<?>> {
         Objects.requireNonNull(params);
 
         List<String> values = new ArrayList<>(params.size());
-        params.stream().forEachOrdered(p -> values.add(getResourceValue(key, p)));
+        params.forEach(p -> values.add(getResourceValue(key, p)));
         return values;
     }
 
