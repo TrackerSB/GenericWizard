@@ -21,7 +21,12 @@ public abstract class StandaloneWizardPageController<T extends Optional<?>> exte
     private ResourceBundle resources;
     private final ObjectProperty<Stage> stage = new SimpleObjectProperty<>(this, "stage", null);
     private final StringProperty closeText
-            = new SimpleStringProperty(this, "closeText", resources.getString("close"));
+            = new SimpleStringProperty(this, "closeText", null);
+
+    @FXML
+    private void initialize() {
+        setCloseText(resources.getString("close"));
+    }
 
     @NotNull
     public ObjectProperty<Stage> stageProperty() {
