@@ -36,7 +36,7 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
         FXMLLoader fxmlLoader;
         try {
             fxmlLoader = FXMLLoader.load(
-                    getClass().getResource("StandaloneWizardPage.fxml"),
+                    StandaloneWizardPage.class.getResource("StandaloneWizardPage.fxml"),
                     ResourceBundle.getBundle("bayern.steinbrecher.wizard.StandaloneWizardPage"));
         } catch (IOException ex) {
             throw new LoadException("Could not load the standalone wizard page wrapper description", ex);
