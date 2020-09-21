@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
  * @author Stefan Huber
  * @since 1.23
  */
-public abstract class StandaloneWizardPage<T extends Optional<?>, C extends WizardPageController<T>>
+public abstract class StandaloneWizardPage<T extends Optional<?>, C extends StandaloneWizardPageController<T>>
         extends WizardPage<T, C> {
 
     /**
