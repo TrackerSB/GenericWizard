@@ -32,11 +32,12 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
      * @since 1.26
      */
     public Pane generateStandalonePage(@NotNull Stage stage, @Nullable String closeText) throws LoadException {
-        FXMLLoader fxmlLoader;
+        FXMLLoader fxmlLoader = new FXMLLoader(
+                StandaloneWizardPage.class.getResource("StandaloneWizardPage.fxml"),
+                ResourceBundle.getBundle("bayern.steinbrecher.wizard.StandaloneWizardPage"));
+        Pane root;
         try {
-            fxmlLoader = FXMLLoader.load(
-                    StandaloneWizardPage.class.getResource("StandaloneWizardPage.fxml"),
-                    ResourceBundle.getBundle("bayern.steinbrecher.wizard.StandaloneWizardPage"));
+            root = fxmlLoader.load();
         } catch (IOException ex) {
             throw new LoadException("Could not load the standalone wizard page wrapper description", ex);
         }
@@ -48,6 +49,6 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
                 Objects.requireNonNull(stage, "For being used as a standalone window a stage is required"));
         standaloneController.setContent(generateEmbeddableWizardPage().getRoot());
 
-        return fxmlLoader.getRoot();
+        return root;
     }
 }
