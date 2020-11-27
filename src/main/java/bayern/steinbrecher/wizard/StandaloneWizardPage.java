@@ -2,6 +2,7 @@ package bayern.steinbrecher.wizard;
 
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.LoadException;
+import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +30,9 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
     }
 
     /**
-     * @since 1.26
+     * @since 1.37
      */
-    public Pane generateStandalonePage(@NotNull Stage stage, @Nullable String closeText) throws LoadException {
+    public void embedStandaloneWizardPage(@NotNull Stage stage, @Nullable String closeText) throws LoadException {
         FXMLLoader fxmlLoader = new FXMLLoader(
                 StandaloneWizardPage.class.getResource("StandaloneWizardPage.fxml"),
                 ResourceBundle.getBundle("bayern.steinbrecher.wizard.StandaloneWizardPage"));
@@ -41,6 +42,7 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
         } catch (IOException ex) {
             throw new LoadException("Could not load the standalone wizard page wrapper description", ex);
         }
+        stage.setScene(new Scene(root));
 
         // Setup controller
         StandaloneWizardPageController<?> standaloneController = fxmlLoader.getController();
@@ -48,7 +50,5 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
         standaloneController.setStage(
                 Objects.requireNonNull(stage, "For being used as a standalone window a stage is required"));
         standaloneController.setContent(generateEmbeddableWizardPage().getRoot());
-
-        return root;
     }
 }
