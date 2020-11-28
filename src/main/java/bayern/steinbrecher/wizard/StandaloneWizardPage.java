@@ -44,11 +44,14 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
         }
         stage.setScene(new Scene(root));
 
-        // Setup controller
+        // Setup standalone controller
         StandaloneWizardPageController<?> standaloneController = fxmlLoader.getController();
         standaloneController.setCloseText(closeText);
         standaloneController.setStage(
                 Objects.requireNonNull(stage, "For being used as a standalone window a stage is required"));
         standaloneController.setContent(generateEmbeddableWizardPage().getRoot());
+
+        // Make this page aware of the stage as well
+        getController().setStage(stage);
     }
 }
