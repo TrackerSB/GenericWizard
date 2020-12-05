@@ -2,7 +2,6 @@ package bayern.steinbrecher.wizard;
 
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.MapProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -64,6 +63,7 @@ public final class WizardController {
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
     private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(this, "swiping", false);
+    private final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper(false);
 
     private final BooleanBinding previousDisallowed;
     private final BooleanBinding nextDisallowed;
@@ -79,10 +79,6 @@ public final class WizardController {
     private StackPane contents;
 
     public WizardController() {
-        BooleanBinding currentPageValid = Bindings.createBooleanBinding(
-                () -> getCurrentPage() != null && getCurrentPage().isValid(),
-                currentPageProperty(), getCurrentPage().validProperty()
-        );
         previousDisallowed = changingPage.or(atBeginningProperty());
         nextDisallowed = changingPage.or(currentPageProperty().isNull())
                 .or(currentPageValid.not());
@@ -109,6 +105,14 @@ public final class WizardController {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         scrollContent.setMaxHeight(screenSize.getHeight() * MAX_SIZE_FACTOR);
         scrollContent.setMaxWidth(screenSize.getWidth() * MAX_SIZE_FACTOR);
+        currentPage.addListener((obs, previousPage, currentPage) -> {
+            if (currentPage == null) {
+                currentPageValid.unbind();
+                currentPageValid.set(false);
+            } else {
+                currentPageValid.bind(currentPage.validProperty());
+            }
+        });
     }
 
     @FXML
