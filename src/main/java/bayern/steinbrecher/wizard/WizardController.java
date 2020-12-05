@@ -92,7 +92,7 @@ public final class WizardController {
         // Make sure to not access null
         currentPage.set(
                 new EmbeddedWizardPage<Optional<Void>>(
-                        new WizardPage<>("nonExistent", null) {
+                        new WizardPage<>("nonExistent.fxml", null) {
                         }, () -> null, false
                 )
         );
