@@ -72,8 +72,8 @@ public final class WizardController {
     /* FIXME The initial dummy page is needed since the current page may be already requested before there is a chance
      * to specify the pages of the wizard.
      */
-    private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage = new ReadOnlyObjectWrapper<>(
-            this, "currentPage", null);
+    private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage
+            = new ReadOnlyObjectWrapper<>(this, "currentPage", null);
     private final MapProperty<String, EmbeddedWizardPage<?>> visitablePages = new SimpleMapProperty<>();
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
@@ -88,14 +88,7 @@ public final class WizardController {
     private static final String WIZARD_CONTENT_STYLECLASS = "wizard-content";
     private static final Duration SWIPE_DURATION = Duration.seconds(0.75);
 
-    public WizardController() throws LoadException {
-        // Make sure to not access null
-        currentPage.set(
-                new EmbeddedWizardPage<Optional<Void>>(
-                        new WizardPage<>("nonExistent.fxml", null) {
-                        }, () -> null, false
-                )
-        );
+    public WizardController() {
     }
 
     @FXML
