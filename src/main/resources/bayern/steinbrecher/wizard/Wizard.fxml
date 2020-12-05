@@ -1,27 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-Copyright (C) 2020 Stefan Huber
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
--->
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
 <VBox xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="bayern.steinbrecher.wizard.WizardController"
       styleClass="wizard">
@@ -36,17 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <buttons>
             <Button text="%previous"
                     onAction="#showPrevious"
-                    disable="${controller.atBeginning || controller.changingPage}"
+                    disable="${controller.previousDisallowed}"
                     ButtonBar.buttonData="BACK_PREVIOUS"/>
             <Button text="%next"
                     onAction="#showNext"
-                    disable="${(controller.currentPage == null) || (!controller.currentPage.hasNextFunction) || (!controller.currentPage.valid) || controller.changingPage}"
+                    disable="${controller.nextDisallowed}"
                     ButtonBar.buttonData="NEXT_FORWARD"/>
             <Button text="%finish"
                     onAction="#finish"
-                    disable="${(!controller.atFinish) || (controller.currentPage == null) || (!controller.currentPage.valid) || controller.changingPage}"
+                    disable="${controller.finishDisallowed}"
                     ButtonBar.buttonData="FINISH"/>
-            <!-- NOTE: These round braces are necessary! TODO: WHY?! -->
             <Button text="%cancel"
                     onAction="#cancel"
                     ButtonBar.buttonData="CANCEL_CLOSE"/>

@@ -1,23 +1,9 @@
-/*
- * Copyright (C) 2020 Stefan Huber
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package bayern.steinbrecher.wizard;
 
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.MapProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -29,7 +15,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.LoadException;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -44,11 +29,11 @@ import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
@@ -64,35 +49,49 @@ import java.util.logging.Logger;
 public final class WizardController {
 
     private static final Logger LOGGER = Logger.getLogger(WizardController.class.getName());
+    private static final String WIZARD_CONTENT_STYLECLASS = "wizard-content";
+    private static final Duration SWIPE_DURATION = Duration.seconds(0.75);
     /**
      * The percentage of height/width the wizard has to have initially.
      */
     private static final double MAX_SIZE_FACTOR = 0.8;
+
     private final StringProperty currentIndex = new SimpleStringProperty(this, "currentIndex");
-    /* FIXME The initial dummy page is needed since the current page may be already requested before there is a chance
-     * to specify the pages of the wizard.
-     */
     private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage
             = new ReadOnlyObjectWrapper<>(this, "currentPage", null);
+
     private final MapProperty<String, EmbeddedWizardPage<?>> visitablePages = new SimpleMapProperty<>();
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
+    private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(this, "swiping", false);
+
+    private final BooleanBinding previousDisallowed;
+    private final BooleanBinding nextDisallowed;
+    private final BooleanBinding finishDisallowed;
+
     private final ReadOnlyObjectWrapper<WizardState> state
             = new ReadOnlyObjectWrapper<>(this, "state", WizardState.RUNNING);
-    private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(this, "swiping", false);
+
     private final Stack<String> history = new Stack<>();
     @FXML
     private ScrollPane scrollContent;
     @FXML
     private StackPane contents;
-    private static final String WIZARD_CONTENT_STYLECLASS = "wizard-content";
-    private static final Duration SWIPE_DURATION = Duration.seconds(0.75);
 
     public WizardController() {
+        BooleanBinding currentPageValid = Bindings.createBooleanBinding(
+                () -> getCurrentPage() != null && getCurrentPage().isValid(),
+                currentPageProperty(), getCurrentPage().validProperty()
+        );
+        previousDisallowed = changingPage.or(atBeginningProperty());
+        nextDisallowed = changingPage.or(currentPageProperty().isNull())
+                .or(currentPageValid.not());
+        finishDisallowed = changingPage.or(atFinishProperty().not())
+                .or(currentPageProperty().isNull())
+                .or(currentPageValid.not());
     }
 
     @FXML
-    @SuppressWarnings("unused")
     private void initialize() {
         visitablePages.addListener((obs, oldVal, newVal) -> {
             newVal.values().stream()
@@ -113,9 +112,8 @@ public final class WizardController {
     }
 
     @FXML
-    @SuppressWarnings("unused")
     private void showPrevious() {
-        if (!isAtBeginning() && !isChangingPage()) {
+        if (!isPreviousDisallowed()) {
             history.pop(); //Pop current index
             atBeginning.set(history.size() < 2);
             currentIndex.set(history.peek());
@@ -124,9 +122,8 @@ public final class WizardController {
     }
 
     @FXML
-    @SuppressWarnings("unused")
     private void showNext() {
-        if (getCurrentPage().isValid() && !isChangingPage()) {
+        if (!isNextDisallowed()) {
             EmbeddedWizardPage<?> page = getCurrentPage();
             Supplier<String> nextFunction = page.getNextFunction();
             if (page.isHasNextFunction() && page.isValid()) {
@@ -144,29 +141,17 @@ public final class WizardController {
     }
 
     @FXML
-    @SuppressWarnings("unused")
     private void finish() {
-        if (getState() == WizardState.RUNNING && currentPage.getValue().isValid() && atFinish.get()) {
+        if (getState() == WizardState.RUNNING && !isFinishDisallowed()) {
             state.set(WizardState.FINISHED);
         }
     }
 
     @FXML
-    @SuppressWarnings("unused")
     private void cancel() {
         if (getState() == WizardState.RUNNING) {
             state.set(WizardState.ABORTED);
         }
-    }
-
-    @NotNull
-    public MapProperty<String, EmbeddedWizardPage<?>> visitablePagesProperty() {
-        return visitablePages;
-    }
-
-    @NotNull
-    public Map<String, EmbeddedWizardPage<?>> getVisitablePages() {
-        return visitablePages.get();
     }
 
     /**
@@ -230,6 +215,16 @@ public final class WizardController {
         }
     }
 
+    @NotNull
+    public MapProperty<String, EmbeddedWizardPage<?>> visitablePagesProperty() {
+        return visitablePages;
+    }
+
+    @NotNull
+    public Map<String, EmbeddedWizardPage<?>> getVisitablePages() {
+        return visitablePagesProperty().get();
+    }
+
     /**
      * Sets a new map of visitable pages. NOTE: Calling this method causes the wizard to reset to the first page and
      * clear the history.
@@ -267,6 +262,11 @@ public final class WizardController {
     }
 
     @NotNull
+    public Optional<ArrayList<String>> getVisitedPages() {
+        return Optional.ofNullable(getState() == WizardState.FINISHED ? Collections.list(history.elements()) : null);
+    }
+
+    @NotNull
     public ReadOnlyBooleanProperty atBeginningProperty() {
         return atBeginning.getReadOnlyProperty();
     }
@@ -275,69 +275,68 @@ public final class WizardController {
         return atBeginningProperty().getValue();
     }
 
-    /**
-     * Property containing a boolean value representing whether the current page shown is a last one.
-     *
-     * @return {@code true} only if the current page is a last one.
-     */
     @NotNull
     public ReadOnlyBooleanProperty atFinishProperty() {
         return atFinish.getReadOnlyProperty();
     }
 
-    /**
-     * Returns a boolean value representing whether the current page shown is a last one.
-     *
-     * @return {@code true} only if the current page is a last one.
-     */
     public boolean isAtFinish() {
         return atFinishProperty().getValue();
     }
 
+    // Interface methods for Wizard
+
     @NotNull
-    public ReadOnlyObjectProperty<EmbeddedWizardPage<?>> currentPageProperty() {
+    ReadOnlyObjectProperty<EmbeddedWizardPage<?>> currentPageProperty() {
         return currentPage.getReadOnlyProperty();
     }
 
-    @NotNull
-    public EmbeddedWizardPage<?> getCurrentPage() {
+    EmbeddedWizardPage<?> getCurrentPage() {
         return currentPageProperty().getValue();
     }
 
-    /**
-     * Returns the property holding whether the current page is currently changed.
-     *
-     * @return The property holding whether the current page is currently changed.
-     */
     @NotNull
-    public ReadOnlyBooleanProperty changingPageProperty() {
-        return changingPage.getReadOnlyProperty();
-    }
-
-    /**
-     * Checks whether this wizard is currently changing its page.
-     *
-     * @return {@code true} only if this wizard is currently changing its page.
-     */
-    public boolean isChangingPage() {
-        return changingPageProperty().getValue();
-    }
-
-    @NotNull
-    public ReadOnlyObjectProperty<WizardState> stateProperty() {
+    ReadOnlyObjectProperty<WizardState> stateProperty() {
         return state.getReadOnlyProperty();
     }
 
     @NotNull
-    public WizardState getState() {
+    WizardState getState() {
         return stateProperty().get();
     }
 
-    /**
-     * Returns a list of all visited pages if the wizard finished.
-     */
+    // Interface methods for FXML
+
+    @FXML
     @NotNull
-    public Optional<ArrayList<String>> getVisitedPages() {
-        return Optional.ofNullable(getState() == WizardState.FINISHED ? Collections.list(history.elements()) : null);
+    private BooleanBinding previousDisallowedProperty() {
+        return previousDisallowed;
+    }
+
+    @FXML
+    private boolean isPreviousDisallowed() {
+        return previousDisallowedProperty().getValue();
+    }
+
+    @FXML
+    @NotNull
+    private BooleanBinding nextDisallowedProperty() {
+        return nextDisallowed;
+    }
+
+    @FXML
+    private boolean isNextDisallowed() {
+        return nextDisallowedProperty().getValue();
+    }
+
+    @FXML
+    @NotNull
+    private BooleanBinding finishDisallowedProperty() {
+        return finishDisallowed;
+    }
+
+    @FXML
+    private boolean isFinishDisallowed() {
+        return finishDisallowedProperty().getValue();
     }
 }
