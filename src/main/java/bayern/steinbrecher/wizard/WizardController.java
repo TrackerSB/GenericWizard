@@ -2,7 +2,6 @@ package bayern.steinbrecher.wizard;
 
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.MapProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
