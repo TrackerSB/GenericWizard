@@ -65,9 +65,9 @@ public final class WizardController {
     private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(this, "swiping", false);
     private final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper(false);
 
-    private final BooleanBinding previousDisallowed;
-    private final BooleanBinding nextDisallowed;
-    private final BooleanBinding finishDisallowed;
+    private final ReadOnlyBooleanWrapper previousDisallowed = new ReadOnlyBooleanWrapper(true);
+    private final ReadOnlyBooleanWrapper nextDisallowed = new ReadOnlyBooleanWrapper(true);
+    private final ReadOnlyBooleanWrapper finishDisallowed = new ReadOnlyBooleanWrapper(true);
 
     private final ReadOnlyObjectWrapper<WizardState> state
             = new ReadOnlyObjectWrapper<>(this, "state", WizardState.RUNNING);
@@ -79,12 +79,6 @@ public final class WizardController {
     private StackPane contents;
 
     public WizardController() {
-        previousDisallowed = changingPage.or(atBeginningProperty());
-        nextDisallowed = changingPage.or(currentPageProperty().isNull())
-                .or(currentPageValid.not());
-        finishDisallowed = changingPage.or(atFinishProperty().not())
-                .or(currentPageProperty().isNull())
-                .or(currentPageValid.not());
     }
 
     @FXML
@@ -113,6 +107,14 @@ public final class WizardController {
                 currentPageValid.bind(currentPage.validProperty());
             }
         });
+        previousDisallowed.bind(changingPage.or(atBeginningProperty()));
+        nextDisallowed.bind(
+                changingPage.or(currentPageProperty().isNull())
+                        .or(currentPageValid.not()));
+        finishDisallowed.bind(
+                changingPage.or(atFinishProperty().not())
+                        .or(currentPageProperty().isNull())
+                        .or(currentPageValid.not()));
     }
 
     @FXML
@@ -313,8 +315,8 @@ public final class WizardController {
 
     @FXML
     @NotNull
-    private BooleanBinding previousDisallowedProperty() {
-        return previousDisallowed;
+    private ReadOnlyBooleanProperty previousDisallowedProperty() {
+        return previousDisallowed.getReadOnlyProperty();
     }
 
     @FXML
@@ -324,8 +326,8 @@ public final class WizardController {
 
     @FXML
     @NotNull
-    private BooleanBinding nextDisallowedProperty() {
-        return nextDisallowed;
+    private ReadOnlyBooleanProperty nextDisallowedProperty() {
+        return nextDisallowed.getReadOnlyProperty();
     }
 
     @FXML
@@ -335,8 +337,8 @@ public final class WizardController {
 
     @FXML
     @NotNull
-    private BooleanBinding finishDisallowedProperty() {
-        return finishDisallowed;
+    private ReadOnlyBooleanProperty finishDisallowedProperty() {
+        return finishDisallowed.getReadOnlyProperty();
     }
 
     @FXML
