@@ -312,37 +312,32 @@ public final class WizardController {
     }
 
     // Interface methods for FXML
+    // NOTE Make private and annotate with @FXML as soon as supported
 
     @FXML
-    @NotNull
-    private ReadOnlyBooleanProperty previousDisallowedProperty() {
+    public ReadOnlyBooleanProperty previousDisallowedProperty() {
         return previousDisallowed.getReadOnlyProperty();
     }
 
-    @FXML
-    private boolean isPreviousDisallowed() {
+    public boolean isPreviousDisallowed() {
         return previousDisallowedProperty().getValue();
     }
 
-    @FXML
     @NotNull
-    private ReadOnlyBooleanProperty nextDisallowedProperty() {
+    public ReadOnlyBooleanProperty nextDisallowedProperty() {
         return nextDisallowed.getReadOnlyProperty();
     }
 
-    @FXML
-    private boolean isNextDisallowed() {
+    public boolean isNextDisallowed() {
         return nextDisallowedProperty().getValue();
     }
 
-    @FXML
     @NotNull
-    private ReadOnlyBooleanProperty finishDisallowedProperty() {
+    public ReadOnlyBooleanProperty finishDisallowedProperty() {
         return finishDisallowed.getReadOnlyProperty();
     }
 
-    @FXML
-    private boolean isFinishDisallowed() {
+    public boolean isFinishDisallowed() {
         return finishDisallowedProperty().getValue();
     }
 }
