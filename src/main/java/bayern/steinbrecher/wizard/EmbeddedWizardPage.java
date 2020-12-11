@@ -1,6 +1,6 @@
 package bayern.steinbrecher.wizard;
 
-import javafx.beans.property.Property;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyProperty;
@@ -36,7 +36,7 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     private final WizardPage<T, ?> page;
     private final Pane root;
     private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
-    private final Property<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
+    private final ObjectProperty<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
     private boolean finish;
     private Wizard containingWizard = null;
 
@@ -44,7 +44,7 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
             throws LoadException {
         this.page = Objects.requireNonNull(page);
         this.root = page.loadFXML();
-        this.nextFunction.addListener((obs, oldVal, newVal) -> hasNextFunction.set(newVal != null));
+        hasNextFunction.bind(this.nextFunction.isNotNull());
         setFinishAndNext(finish, nextFunction);
     }
 
