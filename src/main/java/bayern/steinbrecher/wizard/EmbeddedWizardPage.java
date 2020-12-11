@@ -115,8 +115,8 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     }
 
     /**
-     * @return A {@link CompletableFuture} object which contains the dynamically generated next page as soon as the {@link Wizard}
-     * this page belongs to tries to access its next page.
+     * @return A {@link CompletableFuture} object which contains the dynamically generated next page as soon as the
+     * {@link Wizard} this page belongs to tries to access its next page.
      * @see #setFinishAndNext(boolean, Supplier)
      * @since 1.27
      */
