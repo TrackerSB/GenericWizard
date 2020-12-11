@@ -2,6 +2,7 @@ package bayern.steinbrecher.wizard;
 
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.MapProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -109,7 +110,9 @@ public final class WizardController {
         previousDisallowed.bind(changingPage.or(atBeginningProperty()));
         nextDisallowed.bind(
                 changingPage.or(currentPageProperty().isNull())
-                        .or(currentPageValid.not()));
+                        .or(currentPageValid.not())
+                        .or(Bindings.createBooleanBinding(
+                                () -> getCurrentPage().isHasNextFunction(), currentPageProperty()))); // FIXME Does not recognize changing hasNextFunctionProperty()
         finishDisallowed.bind(
                 changingPage.or(atFinishProperty().not())
                         .or(currentPageProperty().isNull())
