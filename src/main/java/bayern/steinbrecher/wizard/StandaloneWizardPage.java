@@ -42,7 +42,12 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
         } catch (IOException ex) {
             throw new LoadException("Could not load the standalone wizard page wrapper description", ex);
         }
-        stage.setScene(new Scene(root));
+        if (stage.getScene() == null) {
+            stage.setScene(new Scene(root));
+        } else {
+            stage.getScene()
+                    .setRoot(root);
+        }
 
         // Setup standalone controller
         StandaloneWizardPageController<?> standaloneController = fxmlLoader.getController();
