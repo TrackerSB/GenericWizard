@@ -112,7 +112,9 @@ public final class WizardController {
                 changingPage.or(currentPageProperty().isNull())
                         .or(currentPageValid.not())
                         .or(Bindings.createBooleanBinding(
-                                () -> getCurrentPage() == null || !getCurrentPage().isHasNextFunction(), currentPageProperty()))); // FIXME Does not recognize changing hasNextFunctionProperty()
+                                () -> getCurrentPage() == null || !getCurrentPage()
+                                        .isHasNextFunction(), currentPageProperty()))); // FIXME Does not recognize
+        // changing hasNextFunctionProperty()
         finishDisallowed.bind(
                 changingPage.or(atFinishProperty().not())
                         .or(currentPageProperty().isNull())
@@ -179,7 +181,7 @@ public final class WizardController {
             }
         };
 
-        Pane nextPane = getVisitablePages()
+        Node nextPane = getVisitablePages()
                 .get(currentIndex.get())
                 .getRoot();
         if (optCurrentPane.isEmpty() || optCurrentPane.get() != nextPane) {

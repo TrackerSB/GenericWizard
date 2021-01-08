@@ -6,7 +6,7 @@ import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.LoadException;
-import javafx.scene.layout.Pane;
+import javafx.scene.Parent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +34,7 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
      */
     public static final String FIRST_PAGE_KEY = "first";
     private final WizardPage<T, ?> page;
-    private final Pane root;
+    private final Parent root;
     private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
     private final ObjectProperty<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
     private boolean finish;
@@ -54,7 +54,7 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
      * @return The pane containing all controls.
      */
     @NotNull
-    public Pane getRoot() {
+    public Parent getRoot() {
         return root;
     }
 
