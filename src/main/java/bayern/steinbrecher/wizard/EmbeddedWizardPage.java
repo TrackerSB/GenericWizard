@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -115,6 +116,12 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     }
 
     /**
+     * This method allows to use the result of one {@link WizardPage} as the input for another {@link WizardPage}.
+     * However, if there are multiple {@link WizardPage}s that depend on previous {@link WizardPage}s then using this
+     * method results in heavily nested and thus hard to read source code. Instead if a {@link WizardPage} depends on
+     * input of other {@link WizardPage}s its constructor should offer constructors that have parameters of type
+     * {@link Future} only. This allows to avoid this method entirely.
+     *
      * @return A {@link CompletableFuture} object which contains the dynamically generated next page as soon as the
      * {@link Wizard} this page belongs to tries to access its next page.
      * @see #setFinishAndNext(boolean, Supplier)
