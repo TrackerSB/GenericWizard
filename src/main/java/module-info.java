@@ -1,9 +1,11 @@
 module bayern.steinbrecher.GenericWizard {
-    requires javafx.fxml;
-    requires javafx.graphics;
+    requires bayern.steinbrecher.Utility;
+    requires com.google.common;
     requires java.desktop;
     requires java.logging;
     requires javafx.controls;
+    requires javafx.fxml;
+    requires javafx.graphics;
     requires org.jetbrains.annotations;
 
     exports bayern.steinbrecher.wizard;
