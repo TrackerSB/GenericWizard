@@ -39,7 +39,7 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper(this, "hasNextFunction");
     private final ObjectProperty<Supplier<String>> nextFunction = new SimpleObjectProperty<>(this, "nextFunction");
     private boolean finish;
-    private Wizard containingWizard = null;
+    private Wizard containingWizard;
 
     EmbeddedWizardPage(@NotNull WizardPage<T, ?> page, @Nullable Supplier<String> nextFunction, boolean finish)
             throws LoadException {

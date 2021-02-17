@@ -78,10 +78,8 @@ public final class WizardController {
     @FXML
     private StackPane contents;
 
-    public WizardController() {
-    }
-
     @FXML
+    @SuppressWarnings("unused")
     private void initialize() {
         visitablePages.addListener((obs, oldVal, newVal) -> {
             newVal.values().stream()
@@ -122,6 +120,7 @@ public final class WizardController {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void showPrevious() {
         if (!isPreviousDisallowed()) {
             history.pop(); //Pop current index
@@ -132,6 +131,7 @@ public final class WizardController {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void showNext() {
         if (!isNextDisallowed()) {
             EmbeddedWizardPage<?> page = getCurrentPage();
@@ -151,6 +151,7 @@ public final class WizardController {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void finish() {
         if (getState() == WizardState.RUNNING && !isFinishDisallowed()) {
             state.set(WizardState.FINISHED);
@@ -158,6 +159,7 @@ public final class WizardController {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void cancel() {
         if (getState() == WizardState.RUNNING) {
             state.set(WizardState.ABORTED);

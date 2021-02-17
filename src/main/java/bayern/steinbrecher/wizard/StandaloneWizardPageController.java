@@ -25,6 +25,7 @@ public class StandaloneWizardPageController<T extends Optional<?>> extends Wizar
     private Pane contentHolder;
 
     @FXML
+    @SuppressWarnings("unused")
     private void initialize() {
         setCloseText(null);
     }
@@ -89,6 +90,7 @@ public class StandaloneWizardPageController<T extends Optional<?>> extends Wizar
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void close() {
         if (getStage() == null) {
             throw new IllegalStateException("Can not close stage since there is no stage set");

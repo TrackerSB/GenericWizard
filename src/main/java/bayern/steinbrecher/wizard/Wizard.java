@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
  * @author Stefan Huber
  * @since 1.0
  */
-public class Wizard {
+public final class Wizard {
 
     private final WizardController controller;
     private final Parent root;

@@ -39,7 +39,7 @@ public class TablePage extends WizardPage<Optional<Void>, TablePageController> {
         try {
             setResults(results.get(NUM_TIMEOUT_TICKS, TIMEOUT_TICK_UNIT));
         } catch (InterruptedException | TimeoutException | ExecutionException ex) {
-            throw new IllegalStateException("The table content to show is not available");
+            throw new IllegalStateException("The table content to show is not available", ex);
         }
     }
 
