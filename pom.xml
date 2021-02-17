@@ -4,7 +4,7 @@
 
     <groupId>bayern.steinbrecher</groupId>
     <artifactId>Wizard</artifactId>
-    <version>1.51-SNAPSHOT</version>
+    <version>1.51</version>
     <packaging>jar</packaging>
 
     <name>Wizard</name>
@@ -192,7 +192,7 @@
         <connection>scm:git:ssh://git@github.com/TrackerSB/GenericWizard.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/TrackerSB/GenericWizard.git</developerConnection>
         <url>https://github.com/TrackerSB/GenericWizard</url>
-        <tag>v1.37</tag>
+        <tag>v1.51</tag>
     </scm>
 
     <distributionManagement>
