@@ -32,7 +32,7 @@ public class TablePageController extends WizardPageController<Optional<Void>> {
     @FXML
     private TableView<List<ReadOnlyStringProperty>> resultView;
     private final ObjectProperty<List<List<String>>> results = new SimpleObjectProperty<>();
-    private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper(this, "empty");
+    private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper();
 
     @FXML
     public void initialize() {
@@ -41,6 +41,8 @@ public class TablePageController extends WizardPageController<Optional<Void>> {
                         || results.get().size() < 2
                         || results.get().stream().mapToLong(List::size).sum() <= 0,
                 results));
+        bindValidProperty(emptyProperty());
+
         results.addListener((obs, oldVal, newVal) -> {
             resultView.getItems().clear();
             resultView.getColumns().clear();
