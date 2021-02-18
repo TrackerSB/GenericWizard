@@ -102,6 +102,10 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     }
 
     public T getResult() {
+        if(getController() == null){
+            throw new IllegalStateException(
+                    "The controller is not available yet. Was the page embedded and at least shown once?");
+        }
         return getController()
                 .getResult();
     }
