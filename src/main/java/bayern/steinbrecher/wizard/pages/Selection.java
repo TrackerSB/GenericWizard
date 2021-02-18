@@ -8,11 +8,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 /**
  * @param <T> The type of the attributes being able to select.
@@ -24,30 +21,26 @@ public class Selection<T extends Comparable<? extends T>>
 
     private static final long NUM_TIMEOUT_TICKS = 3;
     private static final TimeUnit TIMEOUT_TICK_UNIT = TimeUnit.SECONDS;
-    private final Future<Set<T>> options;
+    private final Supplier<Set<T>> options;
 
     /**
      * Creates a new page which represents each given option as selectable {@link CheckBox} and adds a search box which
      * allows to filter the visible options.
      */
     public Selection(@NotNull Set<T> options) {
-        this(new FutureTask<>(() -> options));
+        this(() -> options);
     }
 
     /**
      * @since 1.51
      */
-    public Selection(@NotNull Future<Set<T>> options) {
+    public Selection(@NotNull Supplier<Set<T>> options) {
         super("Selection.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.pages.Selection"));
         this.options = Objects.requireNonNull(options);
     }
 
     @Override
     protected void afterControllerInitialized() {
-        try {
-            getController().setOptions(options.get(NUM_TIMEOUT_TICKS, TIMEOUT_TICK_UNIT));
-        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-            throw new IllegalStateException("The options to select are not available", ex);
-        }
+        getController().setOptions(options.get());
     }
 }
