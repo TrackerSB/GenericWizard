@@ -88,10 +88,10 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
         return finish;
     }
 
-    /*
-     * @param finish         {@code true} only if this page is a last one.
-     * @param nextFunction   The function calculating the name of the next page. In case {@code finish} is
-     *                       {@code true} this value is allowed to be {@code null}.
+    /**
+     * @param finish       {@code true} only if this page is a last one.
+     * @param nextFunction The function calculating the name of the next page. In case {@code finish} is
+     *                     {@code true} this value is allowed to be {@code null}.
      * @since 1.27
      */
     public void setFinishAndNext(boolean finish, @Nullable Supplier<String> nextFunction) {
