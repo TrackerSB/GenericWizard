@@ -80,7 +80,8 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
 
     /**
      * This method is executed after the FXML is loaded and right after the corresponding controller is set. This
-     * function represents an equivalent to a FXML controllers initialize method.
+     * function represents an equivalent to a FXML controllers {@code initialize()} method. The FXML itself is loaded
+     * when and only if this page gets embedded into a {@link Wizard} (see {@link #generateEmbeddableWizardPage()}.
      *
      * @since 1.8
      */
