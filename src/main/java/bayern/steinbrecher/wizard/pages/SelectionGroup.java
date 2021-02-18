@@ -1,6 +1,6 @@
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardPage;
+import bayern.steinbrecher.wizard.StandaloneWizardPage;
 import com.google.common.collect.BiMap;
 import javafx.scene.paint.Color;
 
@@ -12,13 +12,13 @@ import java.util.Set;
 /**
  * Represents a {@link Selection} which allows to select and group items.
  *
- * @author Stefan Huber
  * @param <T> The type of the options to select.
  * @param <G> The type of the groups to associate items with.
+ * @author Stefan Huber
  * @since 1.51
  */
 public final class SelectionGroup<T extends Comparable<T>, G>
-        extends WizardPage<Optional<Map<T, G>>, SelectionGroupController<T, G>> {
+        extends StandaloneWizardPage<Optional<Map<T, G>>, SelectionGroupController<T, G>> {
 
     private final Set<T> options;
     private final BiMap<G, Color> groups;

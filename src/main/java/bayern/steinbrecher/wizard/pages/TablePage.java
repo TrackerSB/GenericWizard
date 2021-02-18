@@ -1,6 +1,6 @@
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardPage;
+import bayern.steinbrecher.wizard.StandaloneWizardPage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.Optional;
  * @author Stefan Huber
  * @since 1.51
  */
-public class TablePage extends WizardPage<Optional<Void>, TablePageController> {
+public class TablePage extends StandaloneWizardPage<Optional<Void>, TablePageController> {
 
     private final List<List<String>> results;
 

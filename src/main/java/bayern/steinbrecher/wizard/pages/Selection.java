@@ -1,6 +1,6 @@
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardPage;
+import bayern.steinbrecher.wizard.StandaloneWizardPage;
 import javafx.scene.control.CheckBox;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  * @since 1.4
  */
 public class Selection<T extends Comparable<? extends T>>
-        extends WizardPage<Optional<Set<T>>, SelectionController<T>> {
+        extends StandaloneWizardPage<Optional<Set<T>>, SelectionController<T>> {
 
     private static final long NUM_TIMEOUT_TICKS = 3;
     private static final TimeUnit TIMEOUT_TICK_UNIT = TimeUnit.SECONDS;

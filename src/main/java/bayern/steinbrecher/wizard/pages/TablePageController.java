@@ -1,6 +1,6 @@
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardPageController;
+import bayern.steinbrecher.wizard.StandaloneWizardPageController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -27,7 +27,7 @@ import java.util.Optional;
  * @author Stefan Huber
  * @since 1.51
  */
-public class TablePageController extends WizardPageController<Optional<Void>> {
+public class TablePageController extends StandaloneWizardPageController<Optional<Void>> {
 
     @FXML
     private TableView<List<ReadOnlyStringProperty>> resultView;

@@ -1,6 +1,6 @@
 package bayern.steinbrecher.wizard.pages;
 
-import bayern.steinbrecher.wizard.WizardPageController;
+import bayern.steinbrecher.wizard.StandaloneWizardPageController;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.MapProperty;
@@ -36,7 +36,8 @@ import java.util.stream.Collectors;
  * @author Stefan Huber
  * @since 1.4
  */
-public class SelectionController<T extends Comparable<? extends T>> extends WizardPageController<Optional<Set<T>>> {
+public class SelectionController<T extends Comparable<? extends T>>
+        extends StandaloneWizardPageController<Optional<Set<T>>> {
 
     private final MapProperty<T, Optional<CheckBox>> optionsProperty
             = new SimpleMapProperty<>(FXCollections.observableHashMap());

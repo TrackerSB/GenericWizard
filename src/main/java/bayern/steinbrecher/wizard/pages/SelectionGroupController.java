@@ -1,7 +1,7 @@
 package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.javaUtility.BindingUtility;
-import bayern.steinbrecher.wizard.WizardPageController;
+import bayern.steinbrecher.wizard.StandaloneWizardPageController;
 import com.google.common.collect.BiMap;
 import javafx.application.Platform;
 import javafx.beans.Observable;
@@ -61,7 +61,8 @@ import java.util.stream.Collectors;
  * @author Stefan Huber
  * @since 1.51
  */
-public class SelectionGroupController<T extends Comparable<T>, G> extends WizardPageController<Optional<Map<T, G>>> {
+public class SelectionGroupController<T extends Comparable<T>, G>
+        extends StandaloneWizardPageController<Optional<Map<T, G>>> {
 
     private static final Logger LOGGER = Logger.getLogger(SelectionGroupController.class.getName());
     private final ObservableValue<ObservableList<AssociatedItem>> options
