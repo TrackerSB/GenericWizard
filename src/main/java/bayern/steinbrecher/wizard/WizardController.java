@@ -176,10 +176,8 @@ public final class WizardController {
         nextDisallowed.bind(
                 changingPage.or(currentPageProperty().isNull())
                         .or(currentPageValid.not())
-                        .or(Bindings.createBooleanBinding(
-                                // FIXME Does not recognize changing hasNextFunctionProperty()
-                                () -> getCurrentPage() == null || !getCurrentPage()
-                                        .isHasNextFunction(), currentPageProperty())));
+                        .or(Bindings.selectBoolean(this, "currentPage", "hasNextFunction")
+                                .not()));
         finishDisallowed.bind(
                 changingPage.or(atFinishProperty().not())
                         .or(currentPageProperty().isNull())
