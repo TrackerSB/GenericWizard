@@ -56,22 +56,20 @@ public final class WizardController {
      */
     private static final double MAX_SIZE_FACTOR = 0.8;
 
-    private final StringProperty currentIndex = new SimpleStringProperty(this, "currentIndex");
-    private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage
-            = new ReadOnlyObjectWrapper<>(this, "currentPage", null);
+    private final StringProperty currentIndex = new SimpleStringProperty();
+    private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage = new ReadOnlyObjectWrapper<>(null);
 
     private final MapProperty<String, WizardPage<?, ?>> visitablePages = new SimpleMapProperty<>();
-    private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper(this, "atBeginning", true);
-    private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(this, "atEnd");
-    private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(this, "swiping", false);
-    private final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper(false);
+    private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper();
+    private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(false);
+    private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(false);
+    private final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper();
 
-    private final ReadOnlyBooleanWrapper previousDisallowed = new ReadOnlyBooleanWrapper(true);
-    private final ReadOnlyBooleanWrapper nextDisallowed = new ReadOnlyBooleanWrapper(true);
-    private final ReadOnlyBooleanWrapper finishDisallowed = new ReadOnlyBooleanWrapper(true);
+    private final ReadOnlyBooleanWrapper previousDisallowed = new ReadOnlyBooleanWrapper();
+    private final ReadOnlyBooleanWrapper nextDisallowed = new ReadOnlyBooleanWrapper();
+    private final ReadOnlyBooleanWrapper finishDisallowed = new ReadOnlyBooleanWrapper();
 
-    private final ReadOnlyObjectWrapper<WizardState> state
-            = new ReadOnlyObjectWrapper<>(this, "state", WizardState.RUNNING);
+    private final ReadOnlyObjectWrapper<WizardState> state = new ReadOnlyObjectWrapper<>(WizardState.RUNNING);
 
     private final Stack<String> history = new Stack<>();
     @FXML
@@ -179,13 +177,16 @@ public final class WizardController {
                 changingPage.or(currentPageProperty().isNull())
                         .or(currentPageValid.not())
                         .or(Bindings.createBooleanBinding(
+                                // FIXME Does not recognize changing hasNextFunctionProperty()
                                 () -> getCurrentPage() == null || !getCurrentPage()
-                                        .isHasNextFunction(), currentPageProperty()))); // FIXME Does not recognize
-        // changing hasNextFunctionProperty()
+                                        .isHasNextFunction(), currentPageProperty())));
         finishDisallowed.bind(
                 changingPage.or(atFinishProperty().not())
                         .or(currentPageProperty().isNull())
                         .or(currentPageValid.not()));
+
+        // Initialize all bindings
+        currentIndex.set(WizardPage.FIRST_PAGE_KEY);
     }
 
     @FXML
