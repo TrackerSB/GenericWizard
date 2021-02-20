@@ -28,6 +28,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -56,22 +57,22 @@ public final class WizardController {
      */
     private static final double MAX_SIZE_FACTOR = 0.8;
 
+    private final MapProperty<String, WizardPage<?, ?>> visitablePages = new SimpleMapProperty<>();
     private final StringProperty currentIndex = new SimpleStringProperty();
     private final ReadOnlyObjectWrapper<EmbeddedWizardPage<?>> currentPage = new ReadOnlyObjectWrapper<>(null);
+    private final Stack<String> history = new Stack<>();
 
-    private final MapProperty<String, WizardPage<?, ?>> visitablePages = new SimpleMapProperty<>();
     private final ReadOnlyBooleanWrapper atBeginning = new ReadOnlyBooleanWrapper();
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(false);
     private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(false);
-    private final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper();
 
+    private final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper();
     private final ReadOnlyBooleanWrapper previousDisallowed = new ReadOnlyBooleanWrapper();
     private final ReadOnlyBooleanWrapper nextDisallowed = new ReadOnlyBooleanWrapper();
     private final ReadOnlyBooleanWrapper finishDisallowed = new ReadOnlyBooleanWrapper();
 
     private final ReadOnlyObjectWrapper<WizardState> state = new ReadOnlyObjectWrapper<>(WizardState.RUNNING);
 
-    private final Stack<String> history = new Stack<>();
     @FXML
     private ScrollPane scrollContent;
     @FXML
@@ -84,86 +85,109 @@ public final class WizardController {
      */
     private Boolean swipeToLeft = null;
 
+    /**
+     * @param nextIndex Iff {@code null} switch to previous page otherwise switch to next page (created from the
+     *                 {@link WizardPage} with the given ID.
+     */
+    private void initializePageChange(@Nullable String nextIndex) {
+        boolean switchToNext = nextIndex != null;
+        swipeToLeft = switchToNext;
+        if (switchToNext) {
+            if (!getVisitablePages().containsKey(nextIndex)) {
+                throw new PageNotFoundException(
+                        String.format("Wizard contains no page with key \"%s\".", nextIndex));
+            }
+            history.push(nextIndex);
+            currentIndex.set(nextIndex);
+        } else {
+            history.pop(); // Pop current index
+            currentIndex.set(history.peek());
+        }
+    }
+
+    private void performPageChange(String nextIndex){
+        changingPage.set(true);
+
+        ObservableList<Node> addedContents = contents.getChildren();
+        Optional<Node> optCurrentPane
+                = Optional.ofNullable(addedContents.isEmpty() ? null : addedContents.get(0));
+        assert optCurrentPane.isEmpty()
+                || optCurrentPane.get() instanceof Pane : "The current content of this wizard is not a pane.";
+        Consumer<Node> removeCurrentPane = currentPane -> {
+            currentPane.getStyleClass().remove(WIZARD_CONTENT_STYLECLASS);
+            if (!contents.getChildren().remove(currentPane)) {
+                LOGGER.log(Level.SEVERE, "The currently shown content of the wizard could not be removed.");
+            }
+        };
+
+        WizardPage<?, ?> nextPage = visitablePages.get(nextIndex);
+        EmbeddedWizardPage<?> nextEmbeddedPage;
+        try {
+            nextEmbeddedPage = nextPage.generateEmbeddableWizardPage();
+        } catch (LoadException ex) {
+            throw new IllegalStateException(
+                    String.format("Could not create wizard page with index %s", nextIndex), ex);
+        }
+        Parent nextPane = nextEmbeddedPage.getRoot();
+        HBox.setHgrow(nextPane, Priority.ALWAYS);
+        VBox.setVgrow(nextPane, Priority.ALWAYS);
+        if (optCurrentPane.isEmpty() || optCurrentPane.get() != nextPane) {
+            contents.getChildren().add(nextPane);
+            nextPane.getStyleClass().add(WIZARD_CONTENT_STYLECLASS);
+        }
+
+        if (swipeToLeft == null) {
+            optCurrentPane.ifPresent(removeCurrentPane);
+            changingPage.set(false);
+        } else {
+            double halfParentWidth = nextPane.getParent().getLayoutBounds().getWidth() / 2;
+            double halfParentHeight = nextPane.getParent().getLayoutBounds().getHeight() / 2;
+            double marginInScene = nextPane.getScene().getWidth() / 2 - halfParentWidth;
+            //CHECKSTYLE.OFF: MagicNumber - The factor 3 is needed to make the initial x position outside the
+            // view.
+            double xRightOuter = 3 * halfParentWidth + marginInScene;
+            //CHECKSTYLE.ON: MagicNumber
+            double xLeftOuter = -halfParentWidth - marginInScene;
+
+            ParallelTransition overallTrans = new ParallelTransition();
+
+            //Swipe new element in
+            MoveTo initialMoveIn = new MoveTo(swipeToLeft ? xRightOuter : xLeftOuter, halfParentHeight);
+            HLineTo hlineIn = new HLineTo(halfParentWidth);
+            Path pathIn = new Path(initialMoveIn, hlineIn);
+            PathTransition pathTransIn = new PathTransition(SWIPE_DURATION, pathIn, nextPane);
+            overallTrans.getChildren().add(pathTransIn);
+
+            optCurrentPane.ifPresent(currentPane -> {
+                //Swipe old element out
+                MoveTo initialMoveOut = new MoveTo(halfParentWidth, halfParentHeight);
+                HLineTo hlineOut = new HLineTo(swipeToLeft ? xLeftOuter : xRightOuter);
+                Path pathOut = new Path(initialMoveOut, hlineOut);
+                PathTransition pathTransOut = new PathTransition(SWIPE_DURATION, pathOut, currentPane);
+                pathTransOut.setOnFinished(aevt -> removeCurrentPane.accept(currentPane));
+                overallTrans.getChildren().add(pathTransOut);
+            });
+
+            overallTrans.setOnFinished(aevt -> changingPage.set(false));
+            overallTrans.playFromStart();
+        }
+
+        atBeginning.set(history.size() < 2);
+        atFinish.set(nextPage.isFinish());
+        currentPage.setValue(nextEmbeddedPage);
+    }
+
     @FXML
     @SuppressWarnings("unused")
     private void initialize() {
         visitablePages.addListener((obs, previousVisitablePages, currentVisitablePages) -> {
-            currentIndex.addListener((obsI, previousIndex, currentIndex) -> {
-                changingPage.set(true);
-                ObservableList<Node> addedContents = contents.getChildren();
-                Optional<Node> optCurrentPane
-                        = Optional.ofNullable(addedContents.isEmpty() ? null : addedContents.get(0));
-                assert optCurrentPane.isEmpty()
-                        || optCurrentPane.get() instanceof Pane : "The current content of this wizard is not a pane.";
-                Consumer<Node> removeCurrentPane = currentPane -> {
-                    currentPane.getStyleClass().remove(WIZARD_CONTENT_STYLECLASS);
-                    if (!contents.getChildren().remove(currentPane)) {
-                        LOGGER.log(Level.SEVERE, "The currently shown content of the wizard could not be removed.");
-                    }
-                };
-
-                WizardPage<?, ?> nextPage = currentVisitablePages.get(currentIndex);
-                EmbeddedWizardPage<?> nextEmbeddedPage;
-                try {
-                    nextEmbeddedPage = nextPage.generateEmbeddableWizardPage();
-                } catch (LoadException ex) {
-                    throw new IllegalStateException(
-                            String.format("Could not create wizard page with index %s", currentIndex), ex);
-                }
-                Parent nextPane = nextEmbeddedPage.getRoot();
-                HBox.setHgrow(nextPane, Priority.ALWAYS);
-                VBox.setVgrow(nextPane, Priority.ALWAYS);
-                if (optCurrentPane.isEmpty() || optCurrentPane.get() != nextPane) {
-                    contents.getChildren().add(nextPane);
-                    nextPane.getStyleClass().add(WIZARD_CONTENT_STYLECLASS);
-                }
-
-                if (swipeToLeft == null) {
-                    optCurrentPane.ifPresent(removeCurrentPane);
-                    changingPage.set(false);
-                } else {
-                    double halfParentWidth = nextPane.getParent().getLayoutBounds().getWidth() / 2;
-                    double halfParentHeight = nextPane.getParent().getLayoutBounds().getHeight() / 2;
-                    double marginInScene = nextPane.getScene().getWidth() / 2 - halfParentWidth;
-                    //CHECKSTYLE.OFF: MagicNumber - The factor 3 is needed to make the initial x position outside the
-                    // view.
-                    double xRightOuter = 3 * halfParentWidth + marginInScene;
-                    //CHECKSTYLE.ON: MagicNumber
-                    double xLeftOuter = -halfParentWidth - marginInScene;
-
-                    ParallelTransition overallTrans = new ParallelTransition();
-
-                    //Swipe new element in
-                    MoveTo initialMoveIn = new MoveTo(swipeToLeft ? xRightOuter : xLeftOuter, halfParentHeight);
-                    HLineTo hlineIn = new HLineTo(halfParentWidth);
-                    Path pathIn = new Path(initialMoveIn, hlineIn);
-                    PathTransition pathTransIn = new PathTransition(SWIPE_DURATION, pathIn, nextPane);
-                    overallTrans.getChildren().add(pathTransIn);
-
-                    optCurrentPane.ifPresent(currentPane -> {
-                        //Swipe old element out
-                        MoveTo initialMoveOut = new MoveTo(halfParentWidth, halfParentHeight);
-                        HLineTo hlineOut = new HLineTo(swipeToLeft ? xLeftOuter : xRightOuter);
-                        Path pathOut = new Path(initialMoveOut, hlineOut);
-                        PathTransition pathTransOut = new PathTransition(SWIPE_DURATION, pathOut, currentPane);
-                        pathTransOut.setOnFinished(aevt -> removeCurrentPane.accept(currentPane));
-                        overallTrans.getChildren().add(pathTransOut);
-                    });
-
-                    overallTrans.setOnFinished(aevt -> changingPage.set(false));
-                    overallTrans.playFromStart();
-                }
-
-                atFinish.set(nextPage.isFinish());
-                currentPage.setValue(nextEmbeddedPage);
-            });
-            history.clear();
+            currentIndex.addListener((obsI, previousIndex, currentIndex) -> performPageChange(currentIndex));
             swipeToLeft = null;
+            history.clear();
+            history.push(WizardPage.FIRST_PAGE_KEY);
             currentIndex.set(WizardPage.FIRST_PAGE_KEY);
         });
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        scrollContent.setMaxHeight(screenSize.getHeight() * MAX_SIZE_FACTOR);
-        scrollContent.setMaxWidth(screenSize.getWidth() * MAX_SIZE_FACTOR);
+
         currentPage.addListener((obs, previousPage, currentPage) -> {
             if (currentPage == null) {
                 currentPageValid.unbind();
@@ -172,16 +196,21 @@ public final class WizardController {
                 currentPageValid.bind(currentPage.validProperty());
             }
         });
+
         previousDisallowed.bind(changingPage.or(atBeginningProperty()));
         nextDisallowed.bind(
                 changingPage.or(currentPageProperty().isNull())
                         .or(currentPageValid.not())
-                        .or(Bindings.selectBoolean(this, "currentPage", "hasNextFunction")
-                                .not()));
+                        .or(Bindings.select(this, "currentPage", "nextFunction")
+                                .isNull()));
         finishDisallowed.bind(
                 changingPage.or(atFinishProperty().not())
                         .or(currentPageProperty().isNull())
                         .or(currentPageValid.not()));
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        scrollContent.setMaxHeight(screenSize.getHeight() * MAX_SIZE_FACTOR);
+        scrollContent.setMaxWidth(screenSize.getWidth() * MAX_SIZE_FACTOR);
 
         // Initialize all bindings
         currentIndex.set(WizardPage.FIRST_PAGE_KEY);
@@ -191,10 +220,7 @@ public final class WizardController {
     @SuppressWarnings("unused")
     private void showPrevious() {
         if (!isPreviousDisallowed()) {
-            history.pop(); // Pop current index
-            atBeginning.set(history.size() < 2);
-            swipeToLeft = false;
-            currentIndex.set(history.peek());
+            initializePageChange(null);
         }
     }
 
@@ -204,16 +230,9 @@ public final class WizardController {
         if (!isNextDisallowed()) {
             EmbeddedWizardPage<?> page = getCurrentPage();
             Supplier<String> nextFunction = page.getNextFunction();
-            if (page.isHasNextFunction() && page.isValid()) {
+            if (nextFunction != null && page.isValid()) {
                 String nextIndex = nextFunction.get();
-                if (nextIndex == null || !getVisitablePages().containsKey(nextIndex)) {
-                    throw new PageNotFoundException(
-                            String.format("Wizard contains no page with key \"%s\".", nextIndex));
-                }
-                history.push(nextIndex);
-                atBeginning.set(false);
-                swipeToLeft = true;
-                currentIndex.set(nextIndex);
+                initializePageChange(Objects.requireNonNull(nextIndex, "The next-function must not return null"));
             }
         }
     }

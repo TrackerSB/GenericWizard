@@ -1,10 +1,9 @@
 package bayern.steinbrecher.wizard;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.LoadException;
 import javafx.scene.Parent;
@@ -43,9 +42,8 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     private static final Logger LOGGER = Logger.getLogger(WizardPage.class.getName());
     private final String fxmlPath;
     private final ResourceBundle bundle;
-    private final ReadOnlyBooleanWrapper hasNextFunction = new ReadOnlyBooleanWrapper();
-    private final ObjectProperty<Supplier<String>> nextFunction = new SimpleObjectProperty<>();
-    private boolean finish = false;
+    private final ReadOnlyObjectWrapper<Supplier<String>> nextFunction = new ReadOnlyObjectWrapper<>();
+    private final ReadOnlyBooleanWrapper finish = new ReadOnlyBooleanWrapper();
     private C controller;
 
     /**
@@ -111,8 +109,8 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     }
 
     @NotNull
-    public ReadOnlyProperty<Supplier<String>> nextFunctionProperty() {
-        return nextFunction;
+    public ReadOnlyObjectProperty<Supplier<String>> nextFunctionProperty() {
+        return nextFunction.getReadOnlyProperty();
     }
 
     /**
@@ -125,8 +123,12 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
         return nextFunctionProperty().getValue();
     }
 
+    public ReadOnlyBooleanProperty finishProperty() {
+        return finish.getReadOnlyProperty();
+    }
+
     public boolean isFinish() {
-        return finish;
+        return finishProperty().get();
     }
 
     /**
@@ -140,7 +142,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
             Objects.requireNonNull(nextFunction,
                     "A non-last page must define a function which calculates the next page.");
         }
-        this.finish = finish;
+        this.finish.set(finish);
         this.nextFunction.setValue(nextFunction);
     }
 
@@ -189,15 +191,6 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
         }
         setFinishAndNext(finish, nextFunction);
         return wizardPageCreation;
-    }
-
-    @NotNull
-    public ReadOnlyBooleanProperty hasNextFunctionProperty() {
-        return hasNextFunction.getReadOnlyProperty();
-    }
-
-    public boolean isHasNextFunction() {
-        return hasNextFunctionProperty().get();
     }
 
     public ReadOnlyBooleanProperty validProperty() {

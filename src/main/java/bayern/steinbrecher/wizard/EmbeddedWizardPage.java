@@ -55,13 +55,4 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     public boolean isValid() {
         return validProperty().get();
     }
-
-    @NotNull
-    public ReadOnlyBooleanProperty hasNextFunctionProperty() {
-        return page.hasNextFunctionProperty();
-    }
-
-    public boolean isHasNextFunction() {
-        return hasNextFunctionProperty().get();
-    }
 }
