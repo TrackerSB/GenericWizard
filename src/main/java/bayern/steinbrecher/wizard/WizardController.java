@@ -328,21 +328,21 @@ public final class WizardController {
     // Interface methods for Wizard
 
     @NotNull
-    ReadOnlyObjectProperty<EmbeddedWizardPage<?>> currentPageProperty() {
+    public ReadOnlyObjectProperty<EmbeddedWizardPage<?>> currentPageProperty() {
         return currentPage.getReadOnlyProperty();
     }
 
-    EmbeddedWizardPage<?> getCurrentPage() {
+    public EmbeddedWizardPage<?> getCurrentPage() {
         return currentPageProperty().getValue();
     }
 
     @NotNull
-    ReadOnlyObjectProperty<WizardState> stateProperty() {
+    public ReadOnlyObjectProperty<WizardState> stateProperty() {
         return state.getReadOnlyProperty();
     }
 
     @NotNull
-    WizardState getState() {
+    public WizardState getState() {
         return stateProperty().get();
     }
 
