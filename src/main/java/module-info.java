@@ -11,6 +11,7 @@ module bayern.steinbrecher.GenericWizard {
     exports bayern.steinbrecher.wizard;
     exports bayern.steinbrecher.wizard.pages;
 
-    opens bayern.steinbrecher.wizard to javafx.fxml;
+    // NOTE 2021-02-21: java.base is required due to usage of Bindings#select(...)
+    opens bayern.steinbrecher.wizard to javafx.fxml, java.base;
     opens bayern.steinbrecher.wizard.pages to javafx.fxml;
 }
