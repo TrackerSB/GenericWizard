@@ -182,10 +182,12 @@ public final class WizardController {
     private void initialize() {
         visitablePages.addListener((obs, previousVisitablePages, currentVisitablePages) -> {
             currentIndex.addListener((obsI, previousIndex, currentIndex) -> performPageChange(currentIndex));
+
+            // Ensure init
             swipeToLeft = null;
             history.clear();
             history.push(WizardPage.FIRST_PAGE_KEY);
-            currentIndex.set(WizardPage.FIRST_PAGE_KEY);
+            performPageChange(WizardPage.FIRST_PAGE_KEY);
         });
 
         currentPage.addListener((obs, previousPage, currentPage) -> {
