@@ -15,9 +15,12 @@ repositories {
     }
 }
 
+sourceCompatibility = 15
+targetCompatibility = 15
+
 dependencies {
     compileOnly "org.jetbrains:annotations:19.0.0"
-    implementation "bayern.steinbrecher:JavaUtility:0.18-rc.5-SNAPSHOT"
+    implementation "bayern.steinbrecher:JavaUtility:0.18-rc.6-SNAPSHOT"
     implementation "com.google.guava:guava:30.1-jre"
 }
 
@@ -36,7 +39,7 @@ plugins.withType(JavaPlugin).configureEach {
 }
 
 javafx {
-    version = "15"
+    version = "$sourceCompatibility"
     modules = [
             "javafx.controls",
             "javafx.fxml",
