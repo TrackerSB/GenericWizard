@@ -121,6 +121,10 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     @NotNull
     @Contract("-> new")
     final EmbeddedWizardPage<T> generateEmbeddableWizardPage() throws LoadException {
+        /* NOTE 2021-03-05: The (re-)generation of an embeddable wizard page creates a new controller as well. Thus, it
+         * has to be ensured that no call reaches the previous controller if there already was one.
+         */
+        controller.set(null);
         return new EmbeddedWizardPage<>(this);
     }
 
