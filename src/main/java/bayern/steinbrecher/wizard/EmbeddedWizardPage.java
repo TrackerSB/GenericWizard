@@ -1,7 +1,7 @@
 package bayern.steinbrecher.wizard;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.fxml.LoadException;
 import javafx.scene.Parent;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +34,7 @@ public final class EmbeddedWizardPage<T extends Optional<?>> {
     }
 
     @NotNull
-    public ReadOnlyProperty<Supplier<String>> nextFunctionProperty() {
+    public ReadOnlyObjectProperty<Supplier<String>> nextFunctionProperty() {
         return page.nextFunctionProperty();
     }
 
