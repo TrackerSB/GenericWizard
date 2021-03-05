@@ -70,8 +70,8 @@ publishing {
         library(MavenPublication) {
             pom {
                 name = 'Wizard'
-                description = 'An abstract structure for JavaFX based applications for handling dialogs and switching between them.'
-                url = 'https://github.com/TrackerSB/GenericWizard'
+                description = 'A generalized, flexible, reusable and dynamic wizard implementation for JavaFX.'
+                url = 'https://www.steinbrecher.bayern/projects/mavenPackages.html#genericWizard'
                 licenses {
                     license {
                         name = 'GPL-3.0'
