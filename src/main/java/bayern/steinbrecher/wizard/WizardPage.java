@@ -30,6 +30,16 @@ import java.util.logging.Logger;
 
 /**
  * Represents a class which can be in a {@link Wizard}.
+ * It is recommended that subclasses of {@link WizardPage} accept input data only in two ways.
+ * <ul>
+ *     <li>
+ *         Final data should be passed via constructor to the {@link WizardPage} which may then forward the data to its
+ *         {@link WizardPageController} in a custom {@link #afterControllerInitialized()}.</li>
+ *     <li>
+ *         Dynamic data should only be passed via setters which forward the data via
+ *         {@link #applyToController(Consumer)} to the pages {@link WizardPageController}.
+ *     </li>
+ * </ul>
  *
  * @param <T> The type of the result of the {@link EmbeddedWizardPage}.
  * @param <C> The type of the controller used by the {@link WizardPage}.
