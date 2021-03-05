@@ -40,6 +40,8 @@ import java.util.logging.Logger;
  *         {@link #applyToController(Consumer)} to the pages {@link WizardPageController}.
  *     </li>
  * </ul>
+ * NOTE 2021-03-05: Allowing data being passed via constructor as well as via setters may result in unexpected behavior
+ * due to lazy creation of the corresponding {@link WizardPageController}.
  *
  * @param <T> The type of the result of the {@link EmbeddedWizardPage}.
  * @param <C> The type of the controller used by the {@link WizardPage}.
@@ -248,6 +250,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     /**
      * If {@link #getController()} returns {@code null} store the action and apply it as soon as the controller is
      * available otherwise apply the action immediately.
+     *
      * @since 1.61
      */
     protected void applyToController(Consumer<C> action) {
