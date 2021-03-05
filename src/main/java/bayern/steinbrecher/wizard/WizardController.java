@@ -2,7 +2,8 @@ package bayern.steinbrecher.wizard;
 
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
-import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.When;
 import javafx.beans.property.MapProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -87,7 +88,7 @@ public final class WizardController {
 
     /**
      * @param nextIndex Iff {@code null} switch to previous page otherwise switch to next page (created from the
-     *                 {@link WizardPage} with the given ID.
+     *                  {@link WizardPage} with the given ID.
      */
     private void initializePageChange(@Nullable String nextIndex) {
         boolean switchToNext = nextIndex != null;
@@ -105,7 +106,7 @@ public final class WizardController {
         }
     }
 
-    private void performPageChange(String nextIndex){
+    private void performPageChange(String nextIndex) {
         changingPage.set(true);
 
         ObservableList<Node> addedContents = contents.getChildren();
@@ -200,11 +201,13 @@ public final class WizardController {
         });
 
         previousDisallowed.bind(changingPage.or(atBeginningProperty()));
+        final BooleanBinding currentPageHasNextFunction = new When(currentPageProperty().isNull())
+                .then(false)
+                .otherwise(getCurrentPage().nextFunctionProperty().isNotNull());
         nextDisallowed.bind(
                 changingPage.or(currentPageProperty().isNull())
                         .or(currentPageValid.not())
-                        .or(Bindings.select(this, "currentPage", "nextFunction")
-                                .isNull()));
+                        .or(currentPageHasNextFunction.not()));
         finishDisallowed.bind(
                 changingPage.or(atFinishProperty().not())
                         .or(currentPageProperty().isNull())
