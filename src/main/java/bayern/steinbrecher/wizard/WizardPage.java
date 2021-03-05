@@ -7,7 +7,6 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.LoadException;
 import javafx.scene.Parent;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +60,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     private final ReadOnlyBooleanWrapper finish = new ReadOnlyBooleanWrapper();
     private final ReadOnlyObjectWrapper<C> controller = new ReadOnlyObjectWrapper<>();
     private final Queue<Consumer<C>> deferredControllerActions = new ArrayDeque<>();
+    private EmbeddedWizardPage<T> generatedEmbeddablePage;
 
     /**
      * @since 1.13
@@ -119,13 +119,16 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
      * @return The newly created {@link EmbeddedWizardPage}.
      */
     @NotNull
-    @Contract("-> new")
     final EmbeddedWizardPage<T> generateEmbeddableWizardPage() throws LoadException {
-        /* NOTE 2021-03-05: The (re-)generation of an embeddable wizard page creates a new controller as well. Thus, it
-         * has to be ensured that no call reaches the previous controller if there already was one.
+        /* NOTE 2021-03-05: Do not re-generate the embeddable wizard page since each generation results in loading and
+         * parsing the corresponding FXML again as well as the instantiation of another controller instance. As a result
+         * it would seem like the page content was reset and changes to wizard page data were ignored (since they may be
+         * directed to the previous controller instead of the new one).
          */
-        controller.set(null);
-        return new EmbeddedWizardPage<>(this);
+        if (generatedEmbeddablePage == null) {
+            generatedEmbeddablePage = new EmbeddedWizardPage<>(this);
+        }
+        return generatedEmbeddablePage;
     }
 
     public T getResult() {
