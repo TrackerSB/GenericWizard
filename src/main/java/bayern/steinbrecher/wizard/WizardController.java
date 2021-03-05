@@ -2,13 +2,13 @@ package bayern.steinbrecher.wizard;
 
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.When;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.MapProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -67,7 +67,6 @@ public final class WizardController {
     private final ReadOnlyBooleanWrapper atFinish = new ReadOnlyBooleanWrapper(false);
     private final ReadOnlyBooleanWrapper changingPage = new ReadOnlyBooleanWrapper(false);
 
-    private final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper();
     private final ReadOnlyBooleanWrapper previousDisallowed = new ReadOnlyBooleanWrapper();
     private final ReadOnlyBooleanWrapper nextDisallowed = new ReadOnlyBooleanWrapper();
     private final ReadOnlyBooleanWrapper finishDisallowed = new ReadOnlyBooleanWrapper();
@@ -191,19 +190,21 @@ public final class WizardController {
             performPageChange(WizardPage.FIRST_PAGE_KEY);
         });
 
+        final ReadOnlyBooleanWrapper currentPageValid = new ReadOnlyBooleanWrapper();
+        final BooleanProperty currentPageHasNextFunction = new SimpleBooleanProperty();
         currentPage.addListener((obs, previousPage, currentPage) -> {
             if (currentPage == null) {
                 currentPageValid.unbind();
                 currentPageValid.set(false);
+                currentPageHasNextFunction.unbind();
+                currentPageHasNextFunction.set(false);
             } else {
                 currentPageValid.bind(currentPage.validProperty());
+                currentPageHasNextFunction.bind(currentPage.nextFunctionProperty().isNull());
             }
         });
 
         previousDisallowed.bind(changingPage.or(atBeginningProperty()));
-        final BooleanBinding currentPageHasNextFunction = new When(currentPageProperty().isNull())
-                .then(false)
-                .otherwise(getCurrentPage().nextFunctionProperty().isNotNull());
         nextDisallowed.bind(
                 changingPage.or(currentPageProperty().isNull())
                         .or(currentPageValid.not())
