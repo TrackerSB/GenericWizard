@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  * @author Stefan Huber
@@ -26,7 +27,7 @@ public class TablePage extends StandaloneWizardPage<Optional<Void>, TablePageCon
      * the table.
      */
     public TablePage(@NotNull List<List<String>> results) {
-        super("TablePage.fxml", null);
+        super("TablePage.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.pages.TablePage"));
         this.results = results;
     }
 
