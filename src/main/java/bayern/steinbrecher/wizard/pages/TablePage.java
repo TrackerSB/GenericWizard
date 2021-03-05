@@ -37,6 +37,6 @@ public class TablePage extends StandaloneWizardPage<Optional<Void>, TablePageCon
     }
 
     public void setResults(@NotNull List<List<String>> results) {
-        getController().setResults(results);
+        applyToController(c -> c.setResults(results));
     }
 }

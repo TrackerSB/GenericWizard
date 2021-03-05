@@ -14,13 +14,16 @@ import org.jetbrains.annotations.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayDeque;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +47,8 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     private final ResourceBundle bundle;
     private final ReadOnlyObjectWrapper<Supplier<String>> nextFunction = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyBooleanWrapper finish = new ReadOnlyBooleanWrapper();
-    private C controller;
+    private final ReadOnlyObjectWrapper<C> controller = new ReadOnlyObjectWrapper<>();
+    private final Queue<Consumer<C>> deferredControllerActions = new ArrayDeque<>();
 
     /**
      * @since 1.13
@@ -52,6 +56,15 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     protected WizardPage(@NotNull String fxmlPath, @Nullable ResourceBundle bundle) {
         this.fxmlPath = Objects.requireNonNull(fxmlPath);
         this.bundle = bundle;
+
+        controllerProperty().addListener((obs, previousController, currentController) -> {
+            if (currentController != null) {
+                while (!deferredControllerActions.isEmpty()) {
+                    deferredControllerActions.poll()
+                            .accept(currentController);
+                }
+            }
+        });
     }
 
     Parent loadFXML() throws LoadException {
@@ -70,7 +83,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
             } catch (IOException ex) {
                 throw new LoadException(ex);
             }
-            controller = fxmlLoader.getController();
+            controller.set(fxmlLoader.getController());
             afterControllerInitialized();
             return root;
         }
@@ -207,7 +220,30 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
                 .get();
     }
 
+    protected ReadOnlyObjectProperty<C> controllerProperty() {
+        return controller.getReadOnlyProperty();
+    }
+
+    /**
+     * In case some function should be applied to the controller at a point at which the controller may be still
+     * {@code null} using {@link #applyToController(Consumer)} should be considered. Subclasses of {@link WizardPage}
+     * that allow setting data via public interface and pipe it to their controller should prefer
+     * {@link #applyToController(Consumer)}.
+     */
     protected C getController() {
-        return controller;
+        return controllerProperty()
+                .get();
+    }
+
+    /**
+     * If {@link #getController()} returns {@code null} store the action and apply it as soon as the controller is
+     * available otherwise apply the action immediately.
+     */
+    protected void applyToController(Consumer<C> action) {
+        if (getController() == null) {
+            deferredControllerActions.add(action);
+        } else {
+            action.accept(getController());
+        }
     }
 }
