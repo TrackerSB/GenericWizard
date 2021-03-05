@@ -54,7 +54,7 @@ public class TablePageController extends StandaloneWizardPageController<Optional
                         || results.get().size() < 2
                         || results.get().stream().mapToLong(List::size).sum() <= 0,
                 results));
-        bindValidProperty(emptyProperty());
+        bindValidProperty(emptyProperty().not());
 
         results.addListener((obs, oldVal, newVal) -> {
             resultView.getItems().clear();
