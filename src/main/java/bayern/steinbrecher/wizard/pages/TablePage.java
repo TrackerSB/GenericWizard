@@ -13,29 +13,17 @@ import java.util.ResourceBundle;
  */
 public class TablePage extends StandaloneWizardPage<Optional<Void>, TablePageController> {
 
-    private final List<List<String>> results;
-
     /**
      * @since 1.52
      */
     public TablePage() {
-        this(List.of());
+        super("TablePage.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.pages.TablePage"));
     }
 
     /**
-     * NOTE The constructor assumes that the results are in row-major order and the first row contains the headings of
-     * the table.
+     * @param results the data to display in row-major order where the first row is assumed to contain the table
+     *                headings.
      */
-    public TablePage(@NotNull List<List<String>> results) {
-        super("TablePage.fxml", ResourceBundle.getBundle("bayern.steinbrecher.wizard.pages.TablePage"));
-        this.results = results;
-    }
-
-    @Override
-    protected void afterControllerInitialized() {
-        setResults(results);
-    }
-
     public void setResults(@NotNull List<List<String>> results) {
         applyToController(c -> c.setResults(results));
     }
