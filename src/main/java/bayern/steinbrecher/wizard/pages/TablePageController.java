@@ -1,5 +1,7 @@
 package bayern.steinbrecher.wizard.pages;
 
+import bayern.steinbrecher.javaUtility.CSVFormat;
+import bayern.steinbrecher.javaUtility.IOUtility;
 import bayern.steinbrecher.wizard.StandaloneWizardPageController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -16,8 +18,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,10 +36,16 @@ import java.util.Optional;
  */
 public class TablePageController extends StandaloneWizardPageController<Optional<Void>> {
 
+    private static final FileChooser CSV_SAVE_PATH = new FileChooser();
     @FXML
     private TableView<List<ReadOnlyStringProperty>> resultView;
     private final ObjectProperty<List<List<String>>> results = new SimpleObjectProperty<>();
     private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper();
+
+    public TablePageController() {
+        CSV_SAVE_PATH.getExtensionFilters()
+                .add(new ExtensionFilter("CSV", "*.csv"));
+    }
 
     @FXML
     public void initialize() {
@@ -79,6 +92,14 @@ public class TablePageController extends StandaloneWizardPageController<Optional
         });
         HBox.setHgrow(resultView, Priority.ALWAYS);
         VBox.setVgrow(resultView, Priority.ALWAYS);
+    }
+
+    @FXML
+    private void export() throws IOException {
+        final File savePath = CSV_SAVE_PATH.showSaveDialog(getStage());
+        if (savePath != null) {
+            IOUtility.writeCSV(Path.of(savePath.toURI()), getResults(), CSVFormat.EXCEL);
+        }
     }
 
     @NotNull
