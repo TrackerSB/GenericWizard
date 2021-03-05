@@ -238,6 +238,7 @@ public abstract class WizardPage<T extends Optional<?>, C extends WizardPageCont
     /**
      * If {@link #getController()} returns {@code null} store the action and apply it as soon as the controller is
      * available otherwise apply the action immediately.
+     * @since 1.61
      */
     protected void applyToController(Consumer<C> action) {
         if (getController() == null) {
