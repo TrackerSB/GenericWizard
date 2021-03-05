@@ -69,7 +69,7 @@ publishing {
     publications {
         library(MavenPublication) {
             pom {
-                name = 'Wizard'
+                name = 'GenericWizard'
                 description = 'A generalized, flexible, reusable and dynamic wizard implementation for JavaFX.'
                 url = 'https://www.steinbrecher.bayern/projects/mavenPackages.html#genericWizard'
                 licenses {
