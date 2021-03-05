@@ -200,7 +200,7 @@ public final class WizardController {
                 currentPageHasNextFunction.set(false);
             } else {
                 currentPageValid.bind(currentPage.validProperty());
-                currentPageHasNextFunction.bind(currentPage.nextFunctionProperty().isNull());
+                currentPageHasNextFunction.bind(currentPage.nextFunctionProperty().isNotNull());
             }
         });
 
