@@ -6,7 +6,7 @@ plugins {
 }
 
 group "bayern.steinbrecher"
-version "1.61-rc.11-SNAPSHOT"
+version "1.61-rc.12-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -87,7 +87,7 @@ publishing {
                 scm {
                     connection = 'scm:git:git://github.com/TrackerSB/GenericWizard.git'
                     developerConnection = 'scm:git:ssh://github.com/TrackerSB/GenericWizard.git'
-                    url = 'https://steinbrecher.bayern'
+                    url = 'https://github.com/TrackerSB/GenericWizard'
                 }
             }
             from components.java
