@@ -20,7 +20,7 @@ targetCompatibility = 15
 
 dependencies {
     compileOnly "org.jetbrains:annotations:19.0.0"
-    implementation "bayern.steinbrecher:JavaUtility:0.18-rc.8-SNAPSHOT"
+    implementation "bayern.steinbrecher:JavaUtility:0.18-rc.9-SNAPSHOT"
     implementation "com.google.guava:guava:30.1-jre"
 }
 
