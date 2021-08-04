@@ -115,12 +115,12 @@ public class TablePageController extends StandaloneWizardPageController<Optional
     }
 
     @NotNull
-    public ReadOnlyObjectProperty<List<String>> headingsProperty(){
+    public ReadOnlyObjectProperty<List<String>> headingsProperty() {
         return headings.getReadOnlyProperty();
     }
 
     @NotNull
-    public List<String> getHeadings(){
+    public List<String> getHeadings() {
         return headingsProperty().get();
     }
 
@@ -143,13 +143,14 @@ public class TablePageController extends StandaloneWizardPageController<Optional
     public void setContents(@NotNull List<List<String>> contents) {
         headings.set(Objects.requireNonNull(contents).get(0));
         results.set(
-                contents.stream()
-                        .skip(1)
-                        .collect(() -> new SortedList<>(
-                                FXCollections.observableArrayList()),
-                                ObservableList::add,
-                                ObservableList::addAll
-                        )
+                new SortedList<>(
+                        contents.stream()
+                                .skip(1)
+                                .collect(FXCollections::observableArrayList,
+                                        ObservableList::add,
+                                        ObservableList::addAll
+                                )
+                )
         );
         getResults()
                 .comparatorProperty()
