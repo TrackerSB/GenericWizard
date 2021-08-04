@@ -53,49 +53,26 @@ public class TablePageController extends StandaloneWizardPageController<Optional
         empty.bind(Bindings.createBooleanBinding(
                 () -> results.get() == null // Has no contents
                         || results.get().isEmpty() // Has no lines
-                        || results.get().stream().mapToLong(List::size).sum() <= 0, // Has no columns
+                        || headings.get().isEmpty() // Has no column headings
+                        || results.get().stream().mapToLong(List::size).sum() <= 0, // Has no entry in any line
                 results));
         bindValidProperty(emptyProperty().not());
 
-        results.addListener((obs, oldVal, newVal) -> {
-            resultView.getItems().clear();
+        headings.addListener((obs, previousHeadings, currentHeadings) -> {
             resultView.getColumns().clear();
 
-            if (newVal.size() > 0) {
-                int numColumns = newVal.stream()
-                        .mapToInt(List::size)
-                        .max()
-                        .orElse(0);
-                List<String> headings = newVal.get(0);
-                for (int i = 0; i < numColumns; i++) {
-                    String heading = i >= headings.size() ? "" : headings.get(i);
-                    TableColumn<List<String>, String> column
-                            = new TableColumn<>(heading); //NOPMD - Each iteration defines an unique column.
-                    final int fixedI = i;
-                    column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(fixedI)));
-                    resultView.getColumns().add(column);
-                }
-
-                if (newVal.size() > 1) { //NOPMD - Check whether there are row entries besides the headings.
-                    ObservableList<List<String>> items
-                            = newVal.stream()
-                            .skip(1)
-                            .map(givenRow -> {
-                                List<String> itemsRow = new ArrayList<>(numColumns);
-                                for (int i = 0; i < numColumns; i++) {
-                                    String cellValue = i >= givenRow.size() ? "" : givenRow.get(i);
-                                    //Each iteration defines an observable cell entry.
-                                    itemsRow.add(cellValue);
-                                }
-                                return itemsRow;
-                            }).collect(
-                                    FXCollections::observableArrayList,
-                                    ObservableList::add,
-                                    ObservableList::addAll);
-                    resultView.setItems(items);
-                }
+            for(int i = 0; i < getHeadings().size(); i++){
+                String heading = getHeadings().get(i);
+                TableColumn<List<String>, String> column
+                        = new TableColumn<>(heading); //NOPMD - Each iteration defines an unique column.
+                final int fixedI = i;
+                column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(fixedI)));
+                resultView.getColumns().add(column);
             }
         });
+
+        resultView.itemsProperty()
+                        .bind(results);
         HBox.setHgrow(resultView, Priority.ALWAYS);
         VBox.setVgrow(resultView, Priority.ALWAYS);
     }
