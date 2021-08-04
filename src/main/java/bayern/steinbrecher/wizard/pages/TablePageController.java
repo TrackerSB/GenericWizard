@@ -104,7 +104,10 @@ public class TablePageController extends StandaloneWizardPageController<Optional
     private void export() throws IOException {
         final File savePath = CSV_SAVE_PATH.showSaveDialog(getStage());
         if (savePath != null) {
-            IOUtility.writeCSV(Path.of(savePath.toURI()), getResults(), CSVFormat.EXCEL);
+            List<List<String>> contents = new ArrayList<>();
+            contents.add(getHeadings());
+            contents.addAll(getResults());
+            IOUtility.writeCSV(Path.of(savePath.toURI()), contents, CSVFormat.EXCEL);
         }
     }
 
