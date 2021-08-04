@@ -4,10 +4,10 @@ import bayern.steinbrecher.javaUtility.CSVFormat;
 import bayern.steinbrecher.javaUtility.IOUtility;
 import bayern.steinbrecher.wizard.StandaloneWizardPageController;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -39,7 +39,8 @@ public class TablePageController extends StandaloneWizardPageController<Optional
     private static final FileChooser CSV_SAVE_PATH = new FileChooser();
     @FXML
     private TableView<List<String>> resultView;
-    private final ObjectProperty<SortedList<List<String>>> results = new SimpleObjectProperty<>();
+    private final ReadOnlyObjectWrapper<List<String>> headings = new ReadOnlyObjectWrapper<>();
+    private final ReadOnlyObjectWrapper<SortedList<List<String>>> results = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper();
 
     public TablePageController() {
@@ -50,9 +51,9 @@ public class TablePageController extends StandaloneWizardPageController<Optional
     @FXML
     public void initialize() {
         empty.bind(Bindings.createBooleanBinding(
-                () -> results.get() == null
-                        || results.get().size() < 2
-                        || results.get().stream().mapToLong(List::size).sum() <= 0,
+                () -> results.get() == null // Has no contents
+                        || results.get().isEmpty() // Has no lines
+                        || results.get().stream().mapToLong(List::size).sum() <= 0, // Has no columns
                 results));
         bindValidProperty(emptyProperty().not());
 
@@ -114,21 +115,44 @@ public class TablePageController extends StandaloneWizardPageController<Optional
     }
 
     @NotNull
-    public ObjectProperty<SortedList<List<String>>> resultsProperty() {
-        return results;
+    public ReadOnlyObjectProperty<List<String>> headingsProperty(){
+        return headings.getReadOnlyProperty();
+    }
+
+    @NotNull
+    public List<String> getHeadings(){
+        return headingsProperty().get();
+    }
+
+    @NotNull
+    public ReadOnlyObjectProperty<SortedList<List<String>>> resultsProperty() {
+        return results.getReadOnlyProperty();
     }
 
     /**
-     * @return This content of the table sorted as the content is currently sorted by the user.
+     * @return This content of the table sorted as the content is currently sorted in the table view.
      */
     @NotNull
     public SortedList<List<String>> getResults() {
         return resultsProperty().get();
     }
 
-    public void setResults(@NotNull SortedList<List<String>> results) {
-        resultsProperty().set(Objects.requireNonNull(results));
-        results.comparatorProperty()
+    /**
+     * @param contents The first entry is assumed to represent the headings of the table columns.
+     */
+    public void setContents(@NotNull List<List<String>> contents) {
+        headings.set(Objects.requireNonNull(contents).get(0));
+        results.set(
+                contents.stream()
+                        .skip(1)
+                        .collect(() -> new SortedList<>(
+                                FXCollections.observableArrayList()),
+                                ObservableList::add,
+                                ObservableList::addAll
+                        )
+        );
+        getResults()
+                .comparatorProperty()
                 .bind(resultView.comparatorProperty());
     }
 
