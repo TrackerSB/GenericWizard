@@ -1,6 +1,7 @@
 package bayern.steinbrecher.wizard.pages;
 
 import bayern.steinbrecher.wizard.StandaloneWizardPage;
+import javafx.collections.transformation.SortedList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class TablePage extends StandaloneWizardPage<Optional<Void>, TablePageCon
      * @param results the data to display in row-major order where the first row is assumed to contain the table
      *                headings.
      */
-    public void setResults(@NotNull List<List<String>> results) {
+    public void setResults(@NotNull SortedList<List<String>> results) {
         applyToController(c -> c.setResults(results));
     }
 }

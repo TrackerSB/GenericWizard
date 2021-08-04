@@ -7,11 +7,11 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -38,8 +38,8 @@ public class TablePageController extends StandaloneWizardPageController<Optional
 
     private static final FileChooser CSV_SAVE_PATH = new FileChooser();
     @FXML
-    private TableView<List<ReadOnlyStringProperty>> resultView;
-    private final ObjectProperty<List<List<String>>> results = new SimpleObjectProperty<>();
+    private TableView<List<String>> resultView;
+    private final ObjectProperty<SortedList<List<String>>> results = new SimpleObjectProperty<>();
     private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper();
 
     public TablePageController() {
@@ -68,24 +68,29 @@ public class TablePageController extends StandaloneWizardPageController<Optional
                 List<String> headings = newVal.get(0);
                 for (int i = 0; i < numColumns; i++) {
                     String heading = i >= headings.size() ? "" : headings.get(i);
-                    TableColumn<List<ReadOnlyStringProperty>, String> column
+                    TableColumn<List<String>, String> column
                             = new TableColumn<>(heading); //NOPMD - Each iteration defines an unique column.
                     final int fixedI = i;
-                    column.setCellValueFactory(param -> param.getValue().get(fixedI));
+                    column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(fixedI)));
                     resultView.getColumns().add(column);
                 }
 
                 if (newVal.size() > 1) { //NOPMD - Check whether there are row entries besides the headings.
-                    ObservableList<List<ReadOnlyStringProperty>> items = newVal.subList(1, newVal.size()).stream()
+                    ObservableList<List<String>> items
+                            = newVal.stream()
+                            .skip(1)
                             .map(givenRow -> {
-                                List<ReadOnlyStringProperty> itemsRow = new ArrayList<>(numColumns);
+                                List<String> itemsRow = new ArrayList<>(numColumns);
                                 for (int i = 0; i < numColumns; i++) {
                                     String cellValue = i >= givenRow.size() ? "" : givenRow.get(i);
                                     //Each iteration defines an observable cell entry.
-                                    itemsRow.add(new SimpleStringProperty(cellValue)); //NOPMD
+                                    itemsRow.add(cellValue);
                                 }
                                 return itemsRow;
-                            }).collect(FXCollections::observableArrayList, ObservableList::add, ObservableList::addAll);
+                            }).collect(
+                                    FXCollections::observableArrayList,
+                                    ObservableList::add,
+                                    ObservableList::addAll);
                     resultView.setItems(items);
                 }
             }
@@ -109,17 +114,22 @@ public class TablePageController extends StandaloneWizardPageController<Optional
     }
 
     @NotNull
-    public ObjectProperty<List<List<String>>> resultsProperty() {
+    public ObjectProperty<SortedList<List<String>>> resultsProperty() {
         return results;
     }
 
+    /**
+     * @return This content of the table sorted as the content is currently sorted by the user.
+     */
     @NotNull
-    public List<List<String>> getResults() {
+    public SortedList<List<String>> getResults() {
         return resultsProperty().get();
     }
 
-    public void setResults(@NotNull List<List<String>> results) {
+    public void setResults(@NotNull SortedList<List<String>> results) {
         resultsProperty().set(Objects.requireNonNull(results));
+        results.comparatorProperty()
+                .bind(resultView.comparatorProperty());
     }
 
     @NotNull
