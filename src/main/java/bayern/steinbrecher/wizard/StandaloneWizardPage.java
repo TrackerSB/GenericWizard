@@ -42,6 +42,8 @@ public abstract class StandaloneWizardPage<T extends Optional<?>, C extends Stan
         } catch (IOException ex) {
             throw new LoadException("Could not load the standalone wizard page wrapper description", ex);
         }
+
+        // If there is already a scene defined preserve it in order to preserve its properties like attached stylesheets
         if (stage.getScene() == null) {
             stage.setScene(new Scene(root));
         } else {
