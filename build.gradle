@@ -15,12 +15,12 @@ repositories {
     }
 }
 
-sourceCompatibility = 15
-targetCompatibility = 15
+sourceCompatibility = 16
+targetCompatibility = 16
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations:21.0.1'
-    implementation "bayern.steinbrecher:JavaUtility:0.18-rc.11-SNAPSHOT"
+    compileOnly 'org.jetbrains:annotations:22.0.0'
+    implementation "bayern.steinbrecher:JavaUtility:0.18-rc.12-SNAPSHOT"
     implementation 'com.google.guava:guava:30.1.1-jre'
 }
 
