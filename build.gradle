@@ -6,7 +6,7 @@ plugins {
 }
 
 group "bayern.steinbrecher"
-version "1.61-rc.19-SNAPSHOT"
+version "1.61-rc.20-SNAPSHOT"
 
 repositories {
     mavenCentral()
